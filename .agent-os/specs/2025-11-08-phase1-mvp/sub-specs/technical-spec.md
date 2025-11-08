@@ -45,32 +45,36 @@ This is the technical specification for the spec detailed in /Users/alkein/Devel
 ### 2. File Import System
 
 #### Import Process
-- Recursive folder scanning for supported audio files
-- Multi-threaded import for parallel metadata extraction
+- User selects multiple audio files (stems) to import as a single song
+- Multi-threaded metadata extraction for parallel processing
 - Progress reporting UI with file count and completion percentage
 - Error handling for corrupted or unsupported files (log and skip)
 - Duplicate detection based on file hash (SHA-256 of first 1MB + file size)
 
-#### Stem Detection Algorithm
-Automatically group files as stems using these heuristics:
+#### Stem Detection and Grouping
+Automatically detect and suggest stem names using these heuristics:
 1. **File naming patterns**:
-   - `Song Name - Vocals.wav`, `Song Name - Drums.wav`
-   - `Song Name_Vocals.wav`, `Song Name_Drums.wav`
-   - `Song Name (Vocals).wav`, `Song Name (Drums).wav`
-2. **Folder structure**:
-   - Files in same folder with matching base name
-   - Subfolder per song: `/Song Name/vocals.wav`, `/Song Name/drums.wav`
-3. **Common stem keywords**: vocals, vox, drums, bass, keys, keyboard, piano, guitar, synth, pad, strings, orchestra, click, guide
-4. **Manual override**: Allow user to manually group/ungroup stems in UI
+   - `Song Name - Vocals.wav` → Stem name: "Vocals"
+   - `Song Name_Drums.wav` → Stem name: "Drums"
+   - `Song Name (Bass).wav` → Stem name: "Bass"
+   - `vocals.wav` → Stem name: "Vocals"
+2. **Common stem keywords**: vocals, vox, drums, bass, keys, keyboard, piano, guitar, synth, pad, strings, orchestra, click, guide
+3. **Fallback**: Use filename without extension if no keyword detected
+4. **User override**: Allow editing stem names before final import
+
+#### Song Name Detection
+Automatically suggest song name from selected files:
+1. Extract common prefix from all selected filenames (e.g., "Amazing Grace - Vocals.wav" + "Amazing Grace - Drums.wav" → "Amazing Grace")
+2. Remove common suffixes and delimiters (-, _, (), etc.)
+3. Allow user to edit song name before import
 
 #### Metadata Extraction
-- Song duration (in seconds, accurate to 0.01s)
-- Sample rate and bit depth
-- File size
-- Audio channels (mono/stereo)
-- Optional: BPM detection using onset detection algorithm (aubio library)
-- Optional: Key detection using chromagram analysis
+- Song duration (in seconds, accurate to 0.01s) - use longest stem duration
+- Sample rate and bit depth (per stem)
+- File size (per stem)
+- Audio channels (mono/stereo, per stem)
 - Store extracted metadata in local database
+- **No BPM or key detection** (optional for future phases)
 
 ### 3. Library Management
 

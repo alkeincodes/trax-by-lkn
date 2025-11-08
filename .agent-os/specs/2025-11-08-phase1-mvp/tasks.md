@@ -34,16 +34,17 @@
   - [ ] 3.8 Create pre-populated default settings in app_settings table
   - [ ] 3.9 Verify all database tests pass including constraint validation
 
-- [ ] 4. File Import System
-  - [ ] 4.1 Write tests for folder scanning, metadata extraction, and stem detection
-  - [ ] 4.2 Implement recursive folder scanning for supported audio files
-  - [ ] 4.3 Add multi-threaded metadata extraction using symphonia (duration, sample rate, channels)
-  - [ ] 4.4 Implement stem detection algorithm based on file naming patterns and folder structure
-  - [ ] 4.5 Add duplicate detection using SHA-256 hash of first 1MB + file size
-  - [ ] 4.6 Create progress reporting system using Tauri events (import:progress)
-  - [ ] 4.7 Implement error handling for corrupted or unsupported files (log and skip)
-  - [ ] 4.8 Add database insertion for imported songs and stems with transaction management
-  - [ ] 4.9 Verify all import tests pass including error cases
+- [ ] 4. Multi-Track Song Import System
+  - [ ] 4.1 Write tests for multi-file import, metadata extraction, and stem name detection
+  - [ ] 4.2 Implement file selection handling for multiple audio files (WAV, MP3, FLAC)
+  - [ ] 4.3 Add multi-threaded metadata extraction using symphonia (duration, sample rate, channels, file size)
+  - [ ] 4.4 Implement stem name detection from filenames (extract keywords: vocals, drums, bass, etc.)
+  - [ ] 4.5 Implement song name suggestion by finding common prefix in selected filenames
+  - [ ] 4.6 Add duplicate detection using SHA-256 hash of first 1MB + file size
+  - [ ] 4.7 Create progress reporting system using Tauri events (import:progress)
+  - [ ] 4.8 Implement error handling for corrupted or unsupported files (log and skip)
+  - [ ] 4.9 Add database insertion for imported songs and stems with transaction management
+  - [ ] 4.10 Verify all import tests pass including error cases and edge cases (no common prefix, invalid files)
 
 - [ ] 5. Tauri Backend Commands
   - [ ] 5.1 Write tests for all Tauri command handlers
