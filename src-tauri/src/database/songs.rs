@@ -4,8 +4,8 @@ use super::models::{Song, SongFilter, SortBy};
 // Create a new song
 pub fn create_song(conn: &Connection, song: &Song) -> Result<()> {
   conn.execute(
-    "INSERT INTO songs (id, name, artist, duration, tempo, key, created_at, updated_at)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+    "INSERT INTO songs (id, name, artist, duration, tempo, key, time_signature, created_at, updated_at)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
     params![
       song.id,
       song.name,
@@ -13,6 +13,7 @@ pub fn create_song(conn: &Connection, song: &Song) -> Result<()> {
       song.duration,
       song.tempo,
       song.key,
+      song.time_signature,
       song.created_at,
       song.updated_at,
     ],
@@ -23,7 +24,7 @@ pub fn create_song(conn: &Connection, song: &Song) -> Result<()> {
 // Get a song by ID
 pub fn get_song(conn: &Connection, id: &str) -> Result<Song> {
   conn.query_row(
-    "SELECT id, name, artist, duration, tempo, key, created_at, updated_at
+    "SELECT id, name, artist, duration, tempo, key, time_signature, created_at, updated_at
      FROM songs WHERE id = ?1",
     [id],
     |row| {
@@ -34,8 +35,9 @@ pub fn get_song(conn: &Connection, id: &str) -> Result<Song> {
         duration: row.get(3)?,
         tempo: row.get(4)?,
         key: row.get(5)?,
-        created_at: row.get(6)?,
-        updated_at: row.get(7)?,
+        time_signature: row.get(6)?,
+        created_at: row.get(7)?,
+        updated_at: row.get(8)?,
       })
     },
   )
@@ -45,14 +47,15 @@ pub fn get_song(conn: &Connection, id: &str) -> Result<Song> {
 pub fn update_song(conn: &Connection, song: &Song) -> Result<()> {
   let updated_at = chrono::Utc::now().timestamp();
   conn.execute(
-    "UPDATE songs SET name = ?1, artist = ?2, duration = ?3, tempo = ?4, key = ?5, updated_at = ?6
-     WHERE id = ?7",
+    "UPDATE songs SET name = ?1, artist = ?2, duration = ?3, tempo = ?4, key = ?5, time_signature = ?6, updated_at = ?7
+     WHERE id = ?8",
     params![
       song.name,
       song.artist,
       song.duration,
       song.tempo,
       song.key,
+      song.time_signature,
       updated_at,
       song.id,
     ],
@@ -69,7 +72,7 @@ pub fn delete_song(conn: &Connection, id: &str) -> Result<()> {
 // List songs with optional filtering and sorting
 pub fn list_songs(conn: &Connection, filter: Option<SongFilter>) -> Result<Vec<Song>> {
   let mut query = String::from(
-    "SELECT id, name, artist, duration, tempo, key, created_at, updated_at FROM songs WHERE 1=1"
+    "SELECT id, name, artist, duration, tempo, key, time_signature, created_at, updated_at FROM songs WHERE 1=1"
   );
   let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
 
@@ -122,8 +125,9 @@ pub fn list_songs(conn: &Connection, filter: Option<SongFilter>) -> Result<Vec<S
       duration: row.get(3)?,
       tempo: row.get(4)?,
       key: row.get(5)?,
-      created_at: row.get(6)?,
-      updated_at: row.get(7)?,
+      time_signature: row.get(6)?,
+      created_at: row.get(7)?,
+      updated_at: row.get(8)?,
     })
   })?;
 

@@ -62,6 +62,7 @@ fn run_migration_v1(conn: &Connection) -> Result<()> {
       duration REAL NOT NULL,
       tempo REAL,
       key TEXT,
+      time_signature TEXT,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL
     )",

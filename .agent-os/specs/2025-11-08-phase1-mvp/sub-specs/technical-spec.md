@@ -51,6 +51,13 @@ This is the technical specification for the spec detailed in /Users/alkein/Devel
 - Error handling for corrupted or unsupported files (log and skip)
 - Duplicate detection based on file hash (SHA-256 of first 1MB + file size)
 
+#### Import Workflow
+When importing a multi-track song, prompt user for:
+1. **Song Title** (required) - user enters manually
+2. **Artist** (optional) - user enters manually
+3. **Key** (optional) - user selects from dropdown (C, C#, D, etc. with major/minor variants)
+4. **Time Signature** (optional) - user enters manually (e.g., "4/4", "3/4", "6/8")
+
 #### Stem Detection and Grouping
 Automatically detect and suggest stem names using these heuristics:
 1. **File naming patterns**:
@@ -62,19 +69,13 @@ Automatically detect and suggest stem names using these heuristics:
 3. **Fallback**: Use filename without extension if no keyword detected
 4. **User override**: Allow editing stem names before final import
 
-#### Song Name Detection
-Automatically suggest song name from selected files:
-1. Extract common prefix from all selected filenames (e.g., "Amazing Grace - Vocals.wav" + "Amazing Grace - Drums.wav" → "Amazing Grace")
-2. Remove common suffixes and delimiters (-, _, (), etc.)
-3. Allow user to edit song name before import
-
 #### Metadata Extraction
 - Song duration (in seconds, accurate to 0.01s) - use longest stem duration
 - Sample rate and bit depth (per stem)
 - File size (per stem)
 - Audio channels (mono/stereo, per stem)
 - Store extracted metadata in local database
-- **No BPM or key detection** (optional for future phases)
+- **No BPM detection** (optional for future phases)
 
 ### 3. Library Management
 
@@ -85,8 +86,9 @@ interface Song {
   name: string
   artist?: string
   duration: number // seconds
-  tempo?: number // BPM
-  key?: string // e.g., "C", "Am"
+  tempo?: number // BPM (optional for future phases)
+  key?: string // e.g., "C", "Am", "Dm"
+  timeSignature?: string // e.g., "4/4", "3/4", "6/8"
   createdAt: Date
   updatedAt: Date
   stems: Stem[]

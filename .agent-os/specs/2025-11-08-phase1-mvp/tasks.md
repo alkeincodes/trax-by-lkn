@@ -39,12 +39,12 @@
   - [ ] 4.2 Implement file selection handling for multiple audio files (WAV, MP3, FLAC)
   - [ ] 4.3 Add multi-threaded metadata extraction using symphonia (duration, sample rate, channels, file size)
   - [ ] 4.4 Implement stem name detection from filenames (extract keywords: vocals, drums, bass, etc.)
-  - [ ] 4.5 Implement song name suggestion by finding common prefix in selected filenames
+  - [ ] 4.5 Create import data structure to hold user inputs (title, artist, key, time signature) and file metadata
   - [ ] 4.6 Add duplicate detection using SHA-256 hash of first 1MB + file size
   - [ ] 4.7 Create progress reporting system using Tauri events (import:progress)
   - [ ] 4.8 Implement error handling for corrupted or unsupported files (log and skip)
   - [ ] 4.9 Add database insertion for imported songs and stems with transaction management
-  - [ ] 4.10 Verify all import tests pass including error cases and edge cases (no common prefix, invalid files)
+  - [ ] 4.10 Verify all import tests pass including error cases and edge cases (invalid files, missing required fields)
 
 - [ ] 5. Tauri Backend Commands
   - [ ] 5.1 Write tests for all Tauri command handlers

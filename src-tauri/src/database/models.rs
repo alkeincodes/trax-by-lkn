@@ -9,6 +9,7 @@ pub struct Song {
   pub duration: f64,
   pub tempo: Option<f64>,
   pub key: Option<String>,
+  pub time_signature: Option<String>,
   pub created_at: i64,
   pub updated_at: i64,
 }

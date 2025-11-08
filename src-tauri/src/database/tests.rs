@@ -17,6 +17,7 @@ mod database_tests {
       duration: 180.0,
       tempo: Some(120.0),
       key: Some("C".to_string()),
+      time_signature: Some("4/4".to_string()),
       created_at: chrono::Utc::now().timestamp(),
       updated_at: chrono::Utc::now().timestamp(),
     }
