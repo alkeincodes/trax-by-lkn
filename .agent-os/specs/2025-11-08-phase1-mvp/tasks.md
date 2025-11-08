@@ -56,17 +56,18 @@
   - [ ] 5.8 Add error handling and Result types for all commands
   - [ ] 5.9 Verify all backend command tests pass
 
-- [ ] 6. Library UI Components
+- [ ] 6. Library UI Components (Single-Page Architecture)
   - [ ] 6.1 Write tests for library view components and interactions
-  - [ ] 6.2 Create LibraryView.vue component with grid/list layout
+  - [ ] 6.2 Create LibraryView.vue component with grid/list layout (always visible in main UI)
   - [ ] 6.3 Implement SongCard.vue component showing song name, artist, duration, stem count
   - [ ] 6.4 Add LibraryToolbar.vue with search input, filter controls, and import button
   - [ ] 6.5 Implement search functionality with debounced input (300ms)
   - [ ] 6.6 Add filter controls for tempo range, key, and date added
   - [ ] 6.7 Create Pinia store for library state management (songs, search, filters)
-  - [ ] 6.8 Implement file import dialog using Tauri file picker
-  - [ ] 6.9 Add loading states and progress indicators during import
-  - [ ] 6.10 Verify all library UI tests pass
+  - [ ] 6.8 Create ImportProgressModal.vue to show file scanning and import progress
+  - [ ] 6.9 Implement file import dialog using Tauri file picker (opens modal)
+  - [ ] 6.10 Add loading states and progress indicators during import (in modal)
+  - [ ] 6.11 Verify all library UI tests pass
 
 - [ ] 7. Playback UI Components
   - [ ] 7.1 Write tests for playback controls and stem mixer components
@@ -80,29 +81,34 @@
   - [ ] 7.9 Implement volume slider with real-time updates to backend
   - [ ] 7.10 Verify all playback UI tests pass
 
-- [ ] 8. Setlist Builder UI
+- [ ] 8. Setlist Builder UI (Single-Page with Modals)
   - [ ] 8.1 Write tests for setlist builder drag-and-drop and persistence
-  - [ ] 8.2 Create SetlistView.vue with split-panel layout (library left, setlist right)
+  - [ ] 8.2 Create SetlistView.vue with split-panel layout (library left, setlist right, always visible)
   - [ ] 8.3 Implement SetlistItem.vue as draggable song component with reorder capability
-  - [ ] 8.4 Add SetlistToolbar.vue with new, save, load, delete buttons and setlist name input
-  - [ ] 8.5 Implement HTML5 drag-and-drop for adding songs from library to setlist
-  - [ ] 8.6 Add reordering functionality within setlist by dragging
-  - [ ] 8.7 Implement remove song from setlist (drag to trash or delete button)
-  - [ ] 8.8 Create Pinia store for setlist state (currentSetlist, allSetlists)
-  - [ ] 8.9 Add auto-save functionality with 500ms debounce
-  - [ ] 8.10 Implement recent setlists dropdown for quick access
-  - [ ] 8.11 Verify all setlist UI tests pass
+  - [ ] 8.4 Add SetlistToolbar.vue with new, save, load, delete buttons and setlist dropdown
+  - [ ] 8.5 Create NewSetlistModal.vue for naming and creating new setlists (no page navigation)
+  - [ ] 8.6 Implement HTML5 drag-and-drop for adding songs from library to setlist
+  - [ ] 8.7 Add reordering functionality within setlist by dragging
+  - [ ] 8.8 Implement remove song from setlist (drag to trash or delete button)
+  - [ ] 8.9 Create Pinia store for setlist state (currentSetlist, allSetlists)
+  - [ ] 8.10 Create Pinia store for modal state management (activeModal, modalData)
+  - [ ] 8.11 Add auto-save functionality with 500ms debounce
+  - [ ] 8.12 Implement recent setlists dropdown for quick access (in main UI, no navigation)
+  - [ ] 8.13 Create base Modal.vue and Dialog.vue components with overlay and focus trap
+  - [ ] 8.14 Create SettingsModal.vue for app configuration (audio device, buffer size, theme)
+  - [ ] 8.15 Verify all setlist UI tests pass
 
-- [ ] 9. Error Handling and Logging
+- [ ] 9. Error Handling and Logging (Modal-Based)
   - [ ] 9.1 Write tests for error handling scenarios
-  - [ ] 9.2 Implement file-not-found handling (show error toast, skip to next song)
-  - [ ] 9.3 Add audio device disconnection detection and recovery UI
-  - [ ] 9.4 Implement database corruption detection using PRAGMA integrity_check
-  - [ ] 9.5 Add logging system using log and env_logger crates
-  - [ ] 9.6 Create error toast notification system in Vue frontend
-  - [ ] 9.7 Implement graceful degradation for missing audio files (show in UI, allow re-linking)
-  - [ ] 9.8 Add user-friendly error messages for all failure scenarios
-  - [ ] 9.9 Verify all error handling tests pass
+  - [ ] 9.2 Create ErrorModal.vue for displaying user-friendly error messages
+  - [ ] 9.3 Implement file-not-found handling (show error modal, skip to next song option)
+  - [ ] 9.4 Add audio device disconnection detection and recovery UI (modal-based)
+  - [ ] 9.5 Implement database corruption detection using PRAGMA integrity_check
+  - [ ] 9.6 Add logging system using log and env_logger crates
+  - [ ] 9.7 Create error toast notification system in Vue frontend for non-blocking errors
+  - [ ] 9.8 Implement graceful degradation for missing audio files (show in UI, allow re-linking via modal)
+  - [ ] 9.9 Add user-friendly error messages for all failure scenarios
+  - [ ] 9.10 Verify all error handling tests pass
 
 - [ ] 10. Performance Optimization and Polish
   - [ ] 10.1 Write tests for performance benchmarks (startup time, memory usage, latency)

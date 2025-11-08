@@ -131,11 +131,21 @@ interface AppSettings {
 
 ### 4. Setlist Builder UI
 
-#### User Interface Components
-- **Library Panel** (left): Scrollable list/grid of songs
-- **Setlist Panel** (right): Ordered list of songs in current setlist
+#### Single-Page Application Architecture
+- **Main Layout**: Single-page interface with no page navigation
+- **Library Panel** (left): Scrollable list/grid of songs (always visible)
+- **Setlist Panel** (right): Ordered list of songs in current setlist (always visible)
+- **Modal Dialogs**: Use for creating new setlists, settings, audio routing, confirmations
 - **Drag Handle**: Visual indicator for drag-and-drop
-- **Controls**: New setlist, save, load, delete buttons
+- **Controls**: New setlist (opens modal), save, load, delete buttons
+
+#### Modal-Based Interactions
+- **New Setlist Modal**: Name input, create/cancel buttons
+- **Settings Modal**: Audio device selection, buffer size, theme preferences
+- **Audio Routing Modal**: Configure output routing (future phases)
+- **Import Progress Modal**: Shows file scanning and import progress
+- **Error Modals**: User-friendly error messages and recovery options
+- All modals use overlay backdrop, ESC key to close, focus trap for accessibility
 
 #### Drag and Drop Implementation
 - Use HTML5 Drag and Drop API in Vue 3 frontend
@@ -148,7 +158,7 @@ interface AppSettings {
 - Auto-save setlist on every change (debounced 500ms)
 - Store setlist name, creation date, update date
 - Quick access to recent setlists (last 5)
-- Setlist selection dropdown in top toolbar
+- Setlist selection dropdown in main toolbar (no page navigation)
 
 ### 5. Playback UI Controls
 
@@ -250,8 +260,16 @@ src/components/
 │   ├── StemMixer.vue          # Stem volume faders
 │   ├── StemRow.vue            # Individual stem control
 │   ├── SeekBar.vue            # Progress bar with seeking
+├── modals/
+│   ├── NewSetlistModal.vue    # Create new setlist
+│   ├── SettingsModal.vue      # App settings
+│   ├── AudioRoutingModal.vue  # Audio routing config (future)
+│   ├── ImportProgressModal.vue # File import progress
+│   ├── ErrorModal.vue         # Error notifications
 ├── ui/
-│   └── Button.vue             # Shared UI components
+│   ├── Button.vue             # Shared UI components
+│   ├── Modal.vue              # Base modal component with overlay
+│   └── Dialog.vue             # Confirmation dialogs
 ```
 
 #### State Management
@@ -306,6 +324,24 @@ export const useSetlistStore = defineStore('setlist', {
     async createSetlist(name: string, songIds: string[]) {
       const setlist = await invoke('create_setlist', { name, songIds })
       this.currentSetlist = setlist
+    },
+  },
+})
+
+// stores/modal.ts
+export const useModalStore = defineStore('modal', {
+  state: () => ({
+    activeModal: null as string | null,
+    modalData: {} as Record<string, any>,
+  }),
+  actions: {
+    openModal(modalName: string, data?: any) {
+      this.activeModal = modalName
+      this.modalData = data || {}
+    },
+    closeModal() {
+      this.activeModal = null
+      this.modalData = {}
     },
   },
 })

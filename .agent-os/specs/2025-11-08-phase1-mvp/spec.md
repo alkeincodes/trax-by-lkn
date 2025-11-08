@@ -15,9 +15,9 @@ Build the foundational MVP for TraX by LKN that delivers core multi-track audio 
 As a worship leader, I want to play backing tracks with multiple stems during Sunday service, so that I can adjust individual instrument volumes in real-time and deliver a professional sound experience.
 
 **Workflow:**
-1. User opens TraX and navigates to their library
+1. User opens TraX to the main single-page interface with library visible
 2. Selects a song from their imported tracks
-3. Views all available stems (vocals, drums, bass, keys, etc.)
+3. Views all available stems (vocals, drums, bass, keys, etc.) in the stem mixer panel
 4. Adjusts individual stem volumes before or during playback
 5. Plays track with synchronized multi-stem audio
 6. Pauses, stops, or seeks to different positions seamlessly
@@ -28,26 +28,27 @@ As a worship leader, I want to play backing tracks with multiple stems during Su
 As a church music director, I want to create and save setlists for different worship services, so that I can quickly access the right songs in the correct order without manual searching during time-sensitive moments.
 
 **Workflow:**
-1. User creates a new setlist named "Sunday Nov 10 - 9am Service"
-2. Drags songs from library into setlist in desired order
-3. Saves setlist for future use
-4. On Sunday morning, opens saved setlist
-5. Plays through songs sequentially with one-click navigation
-6. Makes live adjustments to order if needed
-7. Setlist persists for future reference
+1. User clicks "New Setlist" button which opens a modal
+2. Names the setlist "Sunday Nov 10 - 9am Service" in the modal
+3. Drags songs from library into setlist panel in desired order
+4. Saves setlist (modal closes automatically)
+5. On Sunday morning, selects saved setlist from dropdown in main UI
+6. Plays through songs sequentially with one-click navigation
+7. Makes live adjustments to order if needed (all within the single-page interface)
+8. Setlist persists for future reference
 
 ### Story 3: Importing and Organizing Backing Track Library
 
 As a professional musician, I want to import my collection of backing tracks and stems from external sources, so that I can manage all my performance audio in one centralized, searchable library.
 
 **Workflow:**
-1. User clicks "Import Files" button
-2. Selects folder containing backing tracks (WAV, MP3, FLAC files)
-3. System automatically detects stems for each song (matching file naming patterns)
-4. User reviews detected tracks and stems
-5. Confirms import
-6. Files are indexed with metadata (tempo, key, duration)
-7. User can search, filter, and organize library by song name, artist, tempo, key
+1. User clicks "Import Files" button in the library toolbar
+2. System file picker modal appears for folder selection
+3. User selects folder containing backing tracks (WAV, MP3, FLAC files)
+4. Progress modal displays showing import status
+5. System automatically detects stems for each song (matching file naming patterns)
+6. After import completes, files appear in library with indexed metadata (tempo, key, duration)
+7. User can search, filter, and organize library by song name, artist, tempo, key (all in main UI)
 
 ## Spec Scope
 

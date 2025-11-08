@@ -13,6 +13,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Team collaboration features
 - Local-first architecture (all audio files stored on user's device)
 
+### Application Architecture
+- **Single-Page Application**: No page navigation; all features accessible from main interface
+- **Modal-Based Interactions**: Settings, new setlist creation, audio routing, and dialogs use modals
+- **Always-Visible Panels**: Library, setlist, playback controls, and stem mixer remain visible
+- **No Router**: Application uses a single-page layout without Vue Router or page transitions
+
 ## Tech Stack
 
 ### Frontend
@@ -66,10 +72,15 @@ src/
 ├── assets/
 │   └── index.css          # TailwindCSS v4 theme configuration
 ├── components/
-│   └── ui/                # shadcn-style UI components
+│   ├── library/           # Library view components
+│   ├── setlist/           # Setlist builder components
+│   ├── playback/          # Playback controls and stem mixer
+│   ├── modals/            # Modal dialogs (New Setlist, Settings, Errors, etc.)
+│   └── ui/                # shadcn-style UI primitives (Button, Modal, Dialog)
+├── stores/                # Pinia stores (library, playback, setlist, modal)
 ├── lib/
 │   └── utils.ts           # Shared utilities (cn() function)
-├── App.vue                # Root component
+├── App.vue                # Root single-page component
 └── main.ts                # Vue app entry point
 ```
 
@@ -153,10 +164,22 @@ Components follow the shadcn pattern (see `src/components/ui/Button.vue`):
 3. **Path aliases**: Use `@/` for imports (resolves to `./src`)
 
 ### Adding New Components
-- Place in `src/components/ui/`
+- **UI Primitives**: Place in `src/components/ui/` (Button, Modal, Dialog, etc.)
+- **Feature Components**: Organize by feature in `src/components/library/`, `src/components/setlist/`, etc.
+- **Modal Components**: Place in `src/components/modals/`
 - Use Radix Vue primitives for accessibility
 - Follow Button.vue pattern for variants and props
 - Use theme colors via `hsl(var(--color-*))`
+
+### Modal Pattern
+All modals follow this pattern:
+1. **Base Component**: Use `src/components/ui/Modal.vue` for overlay, backdrop, and focus trap
+2. **Modal Store**: Use `useModalStore()` to manage active modal state
+3. **Opening**: `modalStore.openModal('modal-name', { data })` from any component
+4. **Closing**: ESC key, backdrop click, or `modalStore.closeModal()`
+5. **Examples**: NewSetlistModal, SettingsModal, ErrorModal, ImportProgressModal
+
+**Important**: Never use page navigation or Vue Router. All interactions stay within the single-page layout.
 
 ## Rust Development
 
