@@ -12,14 +12,31 @@ pub use library::*;
 pub use setlists::*;
 
 use std::sync::{Arc, Mutex};
+use std::collections::HashMap;
 use crate::audio::MultiTrackEngine;
 use crate::database::Database;
+
+// Cached song data - all stems pre-decoded and ready to play
+#[derive(Clone)]
+pub struct CachedSong {
+  pub song_id: String,
+  pub stems: Vec<CachedStem>,
+}
+
+#[derive(Clone)]
+pub struct CachedStem {
+  pub stem_id: String,
+  pub samples: Vec<f32>,
+  pub volume: f32,
+  pub is_muted: bool,
+}
 
 // Shared application state for all Tauri commands
 pub struct AppState {
   pub audio_engine: Arc<Mutex<MultiTrackEngine>>,
   pub database: Arc<Database>,
-  pub stem_id_map: Arc<Mutex<std::collections::HashMap<String, usize>>>,
+  pub stem_id_map: Arc<Mutex<HashMap<String, usize>>>,
+  pub song_cache: Arc<Mutex<HashMap<String, CachedSong>>>,
 }
 
 // SAFETY: AppState uses Arc<Mutex<>> for interior mutability which provides thread safety.
@@ -36,7 +53,8 @@ impl AppState {
     AppState {
       audio_engine: Arc::new(Mutex::new(audio_engine)),
       database: Arc::new(database),
-      stem_id_map: Arc::new(Mutex::new(std::collections::HashMap::new())),
+      stem_id_map: Arc::new(Mutex::new(HashMap::new())),
+      song_cache: Arc::new(Mutex::new(HashMap::new())),
     }
   }
 }

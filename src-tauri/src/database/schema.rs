@@ -1,12 +1,12 @@
 use rusqlite::{Connection, Result};
 
 // Current schema version
-pub const SCHEMA_VERSION: i32 = 1;
+pub const SCHEMA_VERSION: i32 = 2;
 
 // Initialize the database schema
 pub fn initialize_schema(conn: &Connection) -> Result<()> {
   // Enable foreign keys
-  conn.execute("PRAGMA foreign_keys = ON", [])?;
+  conn.execute_batch("PRAGMA foreign_keys = ON;")?;
 
   // Create migrations table if it doesn't exist
   conn.execute(
@@ -25,20 +25,25 @@ pub fn initialize_schema(conn: &Connection) -> Result<()> {
     run_migration_v1(conn)?;
   }
 
+  if current_version < 2 {
+    run_migration_v2(conn)?;
+  }
+
   Ok(())
 }
 
 // Get the current schema version
 fn get_current_version(conn: &Connection) -> Result<i32> {
-  let version: Result<i32> = conn.query_row(
+  let version: Result<Option<i32>> = conn.query_row(
     "SELECT MAX(version) FROM schema_migrations",
     [],
     |row| row.get(0),
   );
 
   match version {
-    Ok(v) => Ok(v),
-    Err(_) => Ok(0),
+    Ok(Some(v)) => Ok(v),
+    Ok(None) => Ok(0),  // Table is empty
+    Err(_) => Ok(0),    // Table doesn't exist yet
   }
 }
 
@@ -136,14 +141,24 @@ fn run_migration_v1(conn: &Connection) -> Result<()> {
   )?;
 
   // Insert default settings row
+  conn.execute_batch("INSERT OR IGNORE INTO settings (id, audio_buffer_size, sample_rate, theme) VALUES (1, 512, 48000, 'dark');")?;
+
+  // Record migration
+  record_migration(conn, 1)?;
+
+  Ok(())
+}
+
+// Migration V2: Add mixdown_path to songs table
+fn run_migration_v2(conn: &Connection) -> Result<()> {
+  // Add mixdown_path column to songs table
   conn.execute(
-    "INSERT OR IGNORE INTO settings (id, audio_buffer_size, sample_rate, theme)
-     VALUES (1, 512, 48000, 'dark')",
+    "ALTER TABLE songs ADD COLUMN mixdown_path TEXT",
     [],
   )?;
 
   // Record migration
-  record_migration(conn, 1)?;
+  record_migration(conn, 2)?;
 
   Ok(())
 }

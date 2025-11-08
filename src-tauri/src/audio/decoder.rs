@@ -131,6 +131,24 @@ impl AudioDecoder {
     }
   }
 
+  /// Decode the entire audio file into memory
+  /// Returns all samples as a single Vec<f32>
+  pub fn decode_all(&mut self) -> AudioResult<Vec<f32>> {
+    let mut all_samples = Vec::new();
+
+    loop {
+      match self.decode_next_packet()? {
+        Some(decoded) => {
+          all_samples.extend_from_slice(&decoded.samples);
+        }
+        None => break,
+      }
+    }
+
+    log::info!("Decoded {} samples total", all_samples.len());
+    Ok(all_samples)
+  }
+
   pub fn seek(&mut self, time_seconds: f64) -> AudioResult<()> {
     let track = self
       .format

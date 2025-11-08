@@ -1,6 +1,7 @@
 mod metadata;
 mod stem_detection;
 mod duplicate;
+mod mixdown;
 
 #[cfg(test)]
 mod tests;
@@ -245,6 +246,7 @@ pub fn import_song(db: &Database, request: ImportRequest) -> Result<String, Impo
     tempo: None,
     key: request.key.clone(),
     time_signature: request.time_signature.clone(),
+    mixdown_path: None, // Will be set after mixdown generation
     created_at: now,
     updated_at: now,
   };
@@ -253,8 +255,11 @@ pub fn import_song(db: &Database, request: ImportRequest) -> Result<String, Impo
   db.create_song(&song)
     .map_err(|e| ImportError::Database(format!("Failed to create song: {}", e)))?;
 
-  // Store the count before consuming the vector
+  // Store the count and file paths before consuming the vector
   let stems_count = processed_files.len();
+  let stem_file_paths: Vec<PathBuf> = processed_files.iter()
+    .map(|f| f.file_path.clone())
+    .collect();
 
   // Create stem records
   for processed_file in processed_files {
@@ -279,6 +284,31 @@ pub fn import_song(db: &Database, request: ImportRequest) -> Result<String, Impo
         // For now, log the error
         log::error!("Failed to create stem, song may be incomplete: {}", e);
         ImportError::Database(format!("Failed to create stem: {}", e))
+      })?;
+  }
+
+  // Generate mixdown from all stems
+  log::info!("Generating mixdown for song '{}'...", request.title);
+  let mixdown_path = match mixdown::generate_mixdown(&song_id, &stem_file_paths) {
+    Ok(path) => {
+      log::info!("Mixdown generated successfully: {}", path);
+      Some(path)
+    }
+    Err(e) => {
+      log::error!("Failed to generate mixdown: {}. Song will be imported without mixdown.", e);
+      // Don't fail the entire import if mixdown generation fails
+      None
+    }
+  };
+
+  // Update song with mixdown path
+  if mixdown_path.is_some() {
+    let mut updated_song = song.clone();
+    updated_song.mixdown_path = mixdown_path;
+    db.update_song(&updated_song)
+      .map_err(|e| {
+        log::error!("Failed to update song with mixdown path: {}", e);
+        ImportError::Database(format!("Failed to update song: {}", e))
       })?;
   }
 

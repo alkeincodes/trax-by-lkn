@@ -44,11 +44,8 @@ pub fn create_connection(path: &PathBuf) -> Result<Connection> {
 
   let conn = Connection::open(path)?;
 
-  // Enable foreign keys
-  conn.execute("PRAGMA foreign_keys = ON", [])?;
-
-  // Set WAL mode for better concurrency
-  conn.execute("PRAGMA journal_mode = WAL", [])?;
+  // Enable foreign keys and set WAL mode
+  conn.execute_batch("PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;")?;
 
   Ok(conn)
 }
@@ -58,7 +55,7 @@ pub fn create_in_memory_connection() -> Result<Connection> {
   let conn = Connection::open_in_memory()?;
 
   // Enable foreign keys
-  conn.execute("PRAGMA foreign_keys = ON", [])?;
+  conn.execute_batch("PRAGMA foreign_keys = ON;")?;
 
   Ok(conn)
 }

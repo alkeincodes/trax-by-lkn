@@ -149,6 +149,20 @@ impl Database {
     setlists::list_setlists(&conn)
   }
 
+  pub fn get_setlist_songs(&self, setlist_id: &str) -> Result<Vec<Song>> {
+    let setlist = self.get_setlist(setlist_id)?;
+    let mut songs = Vec::new();
+
+    for song_id in &setlist.song_ids {
+      match self.get_song(song_id) {
+        Ok(song) => songs.push(song),
+        Err(e) => log::warn!("Failed to get song {} in setlist {}: {}", song_id, setlist_id, e),
+      }
+    }
+
+    Ok(songs)
+  }
+
   // ========================================
   // SETTINGS OPERATIONS
   // ========================================

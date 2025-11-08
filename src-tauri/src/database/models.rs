@@ -10,6 +10,7 @@ pub struct Song {
   pub tempo: Option<f64>,
   pub key: Option<String>,
   pub time_signature: Option<String>,
+  pub mixdown_path: Option<String>,
   pub created_at: i64,
   pub updated_at: i64,
 }

@@ -1,9 +1,10 @@
 mod engine;
-mod decoder;
 mod buffer;
 mod types;
-mod resampler;
 mod multi_track;
+
+pub mod decoder;
+pub mod resampler;
 
 pub use engine::AudioEngine;
 pub use multi_track::{MultiTrackEngine, StemCapacity};

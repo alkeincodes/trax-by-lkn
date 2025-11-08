@@ -55,19 +55,15 @@ pub struct MultiTrackEngine {
   playback_state: Arc<Mutex<PlaybackState>>,
   position: Arc<AtomicU64>,
   stream: Option<Stream>,
-  shutdown: Arc<AtomicBool>,
-  decoder_threads: Vec<thread::JoinHandle<()>>,
 }
 
 struct Stem {
   id: usize,
-  decoder: AudioDecoder,
-  buffer: Arc<Mutex<AudioBuffer>>,
-  resampler: Option<LinearResampler>,
+  // Pre-decoded audio samples (all in memory)
+  samples: Vec<f32>,
   sample_rate: u32,
   channels: u16,
   duration: f64,
-  shutdown: Arc<AtomicBool>,
 }
 
 impl MultiTrackEngine {
@@ -130,7 +126,6 @@ impl MultiTrackEngine {
     let stems = Arc::new(Mutex::new(stems_vec));
     let playback_state = Arc::new(Mutex::new(PlaybackState::Stopped));
     let position = Arc::new(AtomicU64::new(0));
-    let shutdown = Arc::new(AtomicBool::new(false));
 
     let mut engine = Self {
       max_stems,
@@ -141,8 +136,6 @@ impl MultiTrackEngine {
       playback_state: playback_state.clone(),
       position: position.clone(),
       stream: None,
-      shutdown: shutdown.clone(),
-      decoder_threads: Vec::new(),
     };
 
     engine.initialize_stream(&device)?;
@@ -211,41 +204,38 @@ impl MultiTrackEngine {
       .iter()
       .any(|s| s.load(Ordering::Acquire));
 
-    let mut samples_read = 0;
-    let mut temp_buffer = vec![0.0f32; output.len()];
+    let current_position = position.load(Ordering::Acquire) as usize;
 
     for (idx, stem_opt) in stems_guard.iter().enumerate() {
       if let Some(stem) = stem_opt {
         let is_muted = stem_mutes[idx].load(Ordering::Acquire);
         let is_soloed = stem_solos[idx].load(Ordering::Acquire);
 
-        let should_play = if any_soloed {
+        let should_output = if any_soloed {
           is_soloed
         } else {
           !is_muted
         };
 
-        if !should_play {
-          continue;
-        }
+        if should_output {
+          let volume_bits = stem_volumes[idx].load(Ordering::Acquire);
+          let volume = f32::from_bits(volume_bits);
 
-        temp_buffer.fill(0.0);
-        let read = stem.buffer.lock().unwrap().read(&mut temp_buffer);
-        samples_read = samples_read.max(read);
+          // Read directly from pre-decoded samples
+          let samples_to_copy = output.len().min(stem.samples.len().saturating_sub(current_position));
 
-        let volume_bits = stem_volumes[idx].load(Ordering::Acquire);
-        let volume = f32::from_bits(volume_bits);
-
-        for i in 0..output.len() {
-          output[i] += temp_buffer[i] * volume;
+          for i in 0..samples_to_copy {
+            output[i] += stem.samples[current_position + i] * volume;
+          }
         }
       }
     }
 
     drop(stems_guard);
 
-    let new_position = position.load(Ordering::Acquire) + samples_read as u64;
-    position.store(new_position, Ordering::Release);
+    // Advance position by the number of samples we output
+    let new_position = current_position + output.len();
+    position.store(new_position as u64, Ordering::Release);
   }
 
   pub fn max_stems(&self) -> usize {
@@ -266,9 +256,30 @@ impl MultiTrackEngine {
   }
 
   pub fn load_stem(&mut self, path: &str) -> AudioResult<usize> {
-    let decoder = AudioDecoder::new(path)?;
+    log::info!("Loading stem from: {}", path);
+
+    let mut decoder = AudioDecoder::new(path)?;
     let metadata = decoder.get_metadata()?;
 
+    log::info!("Decoding entire audio file...");
+    let mut decoded_samples = decoder.decode_all()?;
+
+    // Resample if necessary
+    if metadata.sample_rate != TARGET_SAMPLE_RATE {
+      log::info!("Resampling from {}Hz to {}Hz", metadata.sample_rate, TARGET_SAMPLE_RATE);
+      let mut resampler = LinearResampler::new(
+        metadata.sample_rate,
+        TARGET_SAMPLE_RATE,
+        metadata.channels,
+      );
+      decoded_samples = resampler.process(&decoded_samples);
+    }
+
+    self.load_stem_from_samples(&decoded_samples)
+  }
+
+  /// Load pre-decoded samples directly into the engine (from cache)
+  pub fn load_stem_from_samples(&mut self, samples: &[f32]) -> AudioResult<usize> {
     let mut stems = self.stems.lock().unwrap();
 
     let stem_id = stems
@@ -276,100 +287,30 @@ impl MultiTrackEngine {
       .position(|s| s.is_none())
       .ok_or_else(|| AudioError::PlaybackError("No available stem slots".to_string()))?;
 
-    let buffer = Arc::new(Mutex::new(AudioBuffer::new(RING_BUFFER_SIZE)));
-    buffer.lock().unwrap().set_ready(true);
-
-    let resampler = if metadata.sample_rate != TARGET_SAMPLE_RATE {
-      Some(LinearResampler::new(
-        metadata.sample_rate,
-        TARGET_SAMPLE_RATE,
-        metadata.channels,
-      ))
-    } else {
-      None
-    };
-
-    let shutdown = Arc::new(AtomicBool::new(false));
-
     let stem = Stem {
       id: stem_id,
-      decoder,
-      buffer: buffer.clone(),
-      resampler,
-      sample_rate: metadata.sample_rate,
-      channels: metadata.channels,
-      duration: metadata.duration,
-      shutdown: shutdown.clone(),
+      samples: samples.to_vec(),
+      sample_rate: TARGET_SAMPLE_RATE,
+      channels: 2, // Assuming stereo
+      duration: samples.len() as f64 / (TARGET_SAMPLE_RATE as f64 * 2.0),
     };
 
     stems[stem_id] = Some(stem);
     drop(stems);
 
-    self.start_decoder_thread(stem_id);
+    log::info!("Successfully loaded stem from samples at index {}", stem_id);
 
     Ok(stem_id)
   }
 
-  fn start_decoder_thread(&mut self, stem_id: usize) {
-    let stems = self.stems.clone();
-    let playback_state = self.playback_state.clone();
-    let engine_shutdown = self.shutdown.clone();
-
-    let handle = thread::spawn(move || {
-      loop {
-        let should_exit = engine_shutdown.load(Ordering::Acquire);
-        if should_exit {
-          break;
-        }
-
-        let should_decode = {
-          let state = playback_state.lock().unwrap();
-          *state == PlaybackState::Playing
-        };
-
-        if should_decode {
-          let mut stems_guard = stems.lock().unwrap();
-          if let Some(Some(stem)) = stems_guard.get_mut(stem_id) {
-            let buffer_space = {
-              let buffer = stem.buffer.lock().unwrap();
-              buffer.available_samples() < RING_BUFFER_SIZE / 2
-            };
-
-            if buffer_space {
-              if let Ok(Some(decoded)) = stem.decoder.decode_next_packet() {
-                let samples = if let Some(resampler) = &mut stem.resampler {
-                  resampler.process(&decoded.samples)
-                } else {
-                  decoded.samples
-                };
-
-                stem.buffer.lock().unwrap().write(&samples);
-              }
-            }
-          }
-          drop(stems_guard);
-        }
-
-        thread::sleep(std::time::Duration::from_millis(1));
-      }
-    });
-
-    self.decoder_threads.push(handle);
-  }
 
   pub fn clear_stems(&mut self) {
-    self.shutdown.store(true, Ordering::Release);
-
-    for handle in self.decoder_threads.drain(..) {
-      let _ = handle.join();
-    }
-
-    self.shutdown.store(false, Ordering::Release);
-
+    // Clear all stem slots
     let mut stems = self.stems.lock().unwrap();
     for stem_slot in stems.iter_mut() {
       *stem_slot = None;
     }
+    drop(stems);
 
     self.position.store(0, Ordering::Release);
   }
@@ -453,20 +394,40 @@ impl MultiTrackEngine {
     Ok(())
   }
 
+  pub fn seek(&mut self, position_seconds: f64) -> AudioResult<()> {
+    // Convert seconds to sample position (stereo, so multiply by 2)
+    let sample_position = (position_seconds * TARGET_SAMPLE_RATE as f64 * 2.0) as u64;
+
+    // Update the position - no need to clear buffers since we read directly from pre-decoded samples
+    self.position.store(sample_position, Ordering::Release);
+
+    log::info!("Seeked to position: {} seconds ({} samples)", position_seconds, sample_position);
+
+    Ok(())
+  }
+
   pub fn position(&self) -> f64 {
     let sample_position = self.position.load(Ordering::Acquire);
     sample_position as f64 / (TARGET_SAMPLE_RATE as f64 * 2.0)
+  }
+
+  pub fn state(&self) -> PlaybackState {
+    *self.playback_state.lock().unwrap()
+  }
+
+  /// Get a clone of the position Arc for cross-thread access
+  pub fn position_arc(&self) -> Arc<AtomicU64> {
+    self.position.clone()
+  }
+
+  /// Get a clone of the playback state Arc for cross-thread access
+  pub fn playback_state_arc(&self) -> Arc<Mutex<PlaybackState>> {
+    self.playback_state.clone()
   }
 }
 
 impl Drop for MultiTrackEngine {
   fn drop(&mut self) {
-    self.shutdown.store(true, Ordering::Release);
-
-    for handle in self.decoder_threads.drain(..) {
-      let _ = handle.join();
-    }
-
     if let Some(stream) = self.stream.take() {
       drop(stream);
     }
