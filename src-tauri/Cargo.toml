@@ -37,4 +37,6 @@ log = "0.4"
 env_logger = "0.11"
 thiserror = "2.0"
 chrono = "0.4"
+rayon = "1.10"
+sha2 = "0.10"
 
