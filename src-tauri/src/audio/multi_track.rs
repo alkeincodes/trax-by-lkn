@@ -12,7 +12,39 @@ use super::types::{AudioError, AudioResult, PlaybackState};
 const TARGET_SAMPLE_RATE: u32 = 48000;
 const BUFFER_SIZE: usize = 512;
 const RING_BUFFER_SIZE: usize = 48000 * 2;
-const MAX_STEMS: usize = 16;
+
+/// Preset configurations for maximum stem count
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum StemCapacity {
+  /// Standard configuration - suitable for most backing tracks (16 stems)
+  Standard,
+  /// Extended configuration - for complex arrangements (32 stems)
+  Extended,
+  /// Professional configuration - for orchestral/large productions (64 stems)
+  Professional,
+  /// Custom configuration - user-defined stem count
+  Custom(usize),
+}
+
+impl StemCapacity {
+  pub fn as_usize(&self) -> usize {
+    match self {
+      StemCapacity::Standard => 16,
+      StemCapacity::Extended => 32,
+      StemCapacity::Professional => 64,
+      StemCapacity::Custom(n) => *n,
+    }
+  }
+
+  pub fn from_usize(count: usize) -> Self {
+    match count {
+      16 => StemCapacity::Standard,
+      32 => StemCapacity::Extended,
+      64 => StemCapacity::Professional,
+      n => StemCapacity::Custom(n),
+    }
+  }
+}
 
 pub struct MultiTrackEngine {
   max_stems: usize,
@@ -39,11 +71,38 @@ struct Stem {
 }
 
 impl MultiTrackEngine {
+  /// Create a new multi-track engine with the specified capacity preset
+  pub fn with_capacity(capacity: StemCapacity) -> AudioResult<Self> {
+    Self::new(capacity.as_usize())
+  }
+
+  /// Create a new multi-track engine with standard capacity (16 stems)
+  pub fn new_standard() -> AudioResult<Self> {
+    Self::with_capacity(StemCapacity::Standard)
+  }
+
+  /// Create a new multi-track engine with extended capacity (32 stems)
+  pub fn new_extended() -> AudioResult<Self> {
+    Self::with_capacity(StemCapacity::Extended)
+  }
+
+  /// Create a new multi-track engine with professional capacity (64 stems)
+  pub fn new_professional() -> AudioResult<Self> {
+    Self::with_capacity(StemCapacity::Professional)
+  }
+
+  /// Create a new multi-track engine with a custom stem count
   pub fn new(max_stems: usize) -> AudioResult<Self> {
-    if max_stems > MAX_STEMS {
+    // Validate reasonable limits (prevent excessive memory allocation)
+    if max_stems == 0 {
+      return Err(AudioError::DeviceInit(
+        "Maximum stems must be at least 1".to_string()
+      ));
+    }
+    if max_stems > 256 {
       return Err(AudioError::DeviceInit(format!(
-        "Maximum {} stems supported, requested {}",
-        MAX_STEMS, max_stems
+        "Maximum 256 stems supported for stability, requested {}",
+        max_stems
       )));
     }
 

@@ -15,6 +15,66 @@ fn test_multi_track_engine_initialization() {
 }
 
 #[test]
+fn test_stem_capacity_standard() {
+  let engine = MultiTrackEngine::new_standard().expect("Failed to create standard engine");
+  assert_eq!(engine.max_stems(), 16, "Standard capacity should be 16 stems");
+}
+
+#[test]
+fn test_stem_capacity_extended() {
+  let engine = MultiTrackEngine::new_extended().expect("Failed to create extended engine");
+  assert_eq!(engine.max_stems(), 32, "Extended capacity should be 32 stems");
+}
+
+#[test]
+fn test_stem_capacity_professional() {
+  let engine = MultiTrackEngine::new_professional().expect("Failed to create professional engine");
+  assert_eq!(engine.max_stems(), 64, "Professional capacity should be 64 stems");
+}
+
+#[test]
+fn test_stem_capacity_custom() {
+  let engine = MultiTrackEngine::with_capacity(StemCapacity::Custom(128))
+    .expect("Failed to create custom engine");
+  assert_eq!(engine.max_stems(), 128, "Custom capacity should be 128 stems");
+}
+
+#[test]
+fn test_stem_capacity_enum() {
+  assert_eq!(StemCapacity::Standard.as_usize(), 16);
+  assert_eq!(StemCapacity::Extended.as_usize(), 32);
+  assert_eq!(StemCapacity::Professional.as_usize(), 64);
+  assert_eq!(StemCapacity::Custom(100).as_usize(), 100);
+
+  assert_eq!(StemCapacity::from_usize(16), StemCapacity::Standard);
+  assert_eq!(StemCapacity::from_usize(32), StemCapacity::Extended);
+  assert_eq!(StemCapacity::from_usize(64), StemCapacity::Professional);
+  assert_eq!(StemCapacity::from_usize(100), StemCapacity::Custom(100));
+}
+
+#[test]
+fn test_maximum_stem_limit() {
+  // Should succeed with 256 stems (maximum allowed)
+  let result = MultiTrackEngine::new(256);
+  assert!(result.is_ok(), "Should support up to 256 stems");
+
+  // Should fail with 257 stems (exceeds limit)
+  let result = MultiTrackEngine::new(257);
+  assert!(result.is_err(), "Should reject more than 256 stems");
+}
+
+#[test]
+fn test_minimum_stem_limit() {
+  // Should fail with 0 stems
+  let result = MultiTrackEngine::new(0);
+  assert!(result.is_err(), "Should reject 0 stems");
+
+  // Should succeed with 1 stem
+  let result = MultiTrackEngine::new(1);
+  assert!(result.is_ok(), "Should support at least 1 stem");
+}
+
+#[test]
 fn test_load_multiple_stems() {
   let mut engine = MultiTrackEngine::new(8).expect("Failed to create engine");
 

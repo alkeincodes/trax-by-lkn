@@ -6,7 +6,7 @@ mod resampler;
 mod multi_track;
 
 pub use engine::AudioEngine;
-pub use multi_track::MultiTrackEngine;
+pub use multi_track::{MultiTrackEngine, StemCapacity};
 pub use types::{PlaybackState, AudioCommand, AudioMetadata};
 pub use decoder::AudioDecoder;
 

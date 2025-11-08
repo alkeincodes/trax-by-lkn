@@ -13,7 +13,11 @@ This is the technical specification for the spec detailed in /Users/alkein/Devel
 - Implement lock-free ring buffer for audio thread communication
 - Separate audio processing thread with real-time priority scheduling
 - Pre-load and cache audio buffers in memory to eliminate disk I/O during playback
-- Support simultaneous playback of 16 audio streams with independent volume control
+- **Dynamic multi-track capacity** with configurable presets:
+  - Standard: 16 stems (default, suitable for most backing tracks)
+  - Extended: 32 stems (for complex arrangements)
+  - Professional: 64 stems (for orchestral/large productions)
+  - Custom: Up to 256 stems maximum (user-configurable)
 - Implement sample rate conversion for mixed-rate sources (target: 48kHz output)
 
 #### Audio File Decoding

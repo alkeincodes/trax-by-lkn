@@ -205,6 +205,11 @@ fn command_name(param: &str) -> Result<String, String> {
 2. **Performance**: Target <10ms audio latency for live performance use
 3. **Reliability**: Zero crashes during performances (critical requirement)
 4. **Platform Support**: macOS 11+, Windows 10/11 64-bit (mobile planned for later phases)
+5. **Multi-Track Capacity**: Dynamic stem allocation with configurable presets
+   - Standard: 16 stems (suitable for most backing tracks)
+   - Extended: 32 stems (for complex arrangements)
+   - Professional: 64 stems (for orchestral/large productions)
+   - Custom: Up to 256 stems maximum (user-configurable)
 
 ## Product Development Phases
 
