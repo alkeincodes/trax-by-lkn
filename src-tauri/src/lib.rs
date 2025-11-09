@@ -1,4 +1,5 @@
 mod audio;
+mod cache;
 mod database;
 mod import;
 mod commands;
@@ -6,6 +7,7 @@ mod events;
 
 use std::sync::Arc;
 use audio::MultiTrackEngine;
+use cache::{CacheManager, CacheSettings};
 use database::Database;
 use commands::AppState;
 
@@ -17,7 +19,10 @@ fn greet(name: &str) -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    env_logger::init();
+    // Initialize logger with default level INFO
+    env_logger::Builder::from_default_env()
+        .filter_level(log::LevelFilter::Info)
+        .init();
 
     log::info!("Initializing TraX application...");
 
@@ -27,6 +32,13 @@ pub fn run() {
 
     log::info!("Database initialized successfully");
 
+    // Initialize persistent cache
+    let cache_settings = CacheSettings::default();
+    let cache_manager = CacheManager::new(cache_settings)
+        .expect("Failed to initialize cache manager");
+
+    log::info!("Cache manager initialized successfully");
+
     // Initialize multi-track audio engine with standard capacity (16 stems)
     let audio_engine = MultiTrackEngine::new_standard()
         .expect("Failed to initialize audio engine");
@@ -34,7 +46,7 @@ pub fn run() {
     log::info!("Audio engine initialized successfully");
 
     // Create shared application state
-    let app_state = AppState::new(database, audio_engine);
+    let app_state = AppState::new(database, audio_engine, cache_manager);
 
     // Clone the Arc references needed for position emitter (before moving app_state)
     // We can't pass the whole audio_engine because it contains a non-Send Stream

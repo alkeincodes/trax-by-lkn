@@ -14,6 +14,7 @@ pub use setlists::*;
 use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
 use crate::audio::MultiTrackEngine;
+use crate::cache::CacheManager;
 use crate::database::Database;
 
 // Cached song data - all stems pre-decoded and ready to play
@@ -35,6 +36,7 @@ pub struct CachedStem {
 pub struct AppState {
   pub audio_engine: Arc<Mutex<MultiTrackEngine>>,
   pub database: Arc<Database>,
+  pub cache_manager: Arc<CacheManager>,
   pub stem_id_map: Arc<Mutex<HashMap<String, usize>>>,
   pub song_cache: Arc<Mutex<HashMap<String, CachedSong>>>,
 }
@@ -49,10 +51,11 @@ unsafe impl Send for AppState {}
 unsafe impl Sync for AppState {}
 
 impl AppState {
-  pub fn new(database: Database, audio_engine: MultiTrackEngine) -> Self {
+  pub fn new(database: Database, audio_engine: MultiTrackEngine, cache_manager: CacheManager) -> Self {
     AppState {
       audio_engine: Arc::new(Mutex::new(audio_engine)),
       database: Arc::new(database),
+      cache_manager: Arc::new(cache_manager),
       stem_id_map: Arc::new(Mutex::new(HashMap::new())),
       song_cache: Arc::new(Mutex::new(HashMap::new())),
     }

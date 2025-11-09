@@ -25,13 +25,8 @@ onMounted(() => {
 
 <template>
   <div class="flex h-screen flex-col bg-background text-foreground">
-    <!-- Header -->
-    <header class="border-b border-border px-6 py-4">
-      <h1 class="text-2xl font-bold">TraX by LKN</h1>
-    </header>
-
     <!-- Playback Controls -->
-    <div class="border-b border-border px-6 py-4">
+    <div class="p-6">
       <PlaybackControls />
       <div class="mt-3">
         <SeekBar />

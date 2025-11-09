@@ -1,16 +1,17 @@
 use super::AppState;
 use tauri::{State, Emitter};
+use std::path::Path;
 
 /// Preload a song's stems into cache (decode and store in memory)
 #[tauri::command]
-pub async fn load_song(song_id: String, state: State<'_, AppState>) -> Result<(), String> {
+pub async fn load_song(song_id: String, state: State<'_, AppState>, app_handle: tauri::AppHandle) -> Result<(), String> {
   log::info!("Loading song stems: {}", song_id);
 
-  // Check if already cached
+  // Check if already in memory cache
   {
     let cache = state.song_cache.lock().map_err(|_| "Failed to lock cache")?;
     if cache.contains_key(&song_id) {
-      log::info!("Song {} already cached, skipping decode", song_id);
+      log::info!("Song {} already in memory, skipping load", song_id);
       return Ok(());
     }
   }
@@ -29,14 +30,57 @@ pub async fn load_song(song_id: String, state: State<'_, AppState>) -> Result<()
     return Err("Song has no stems".to_string());
   }
 
+  let total_stems = stems.len();
+
   // Decode all stems and cache them
   let mut cached_stems = Vec::new();
 
-  for stem in stems {
-    log::info!("Decoding stem: {}", stem.name);
+  for (index, stem) in stems.iter().enumerate() {
+    let current_stem = index + 1;
+    log::info!("Loading stem {}/{}: {}", current_stem, total_stems, stem.name);
 
-    // Decode the entire audio file
-    let mut decoder = super::super::audio::decoder::AudioDecoder::new(&stem.file_path)
+    // Emit progress event to frontend
+    let _ = app_handle.emit("stem:loading", serde_json::json!({
+      "song_name": song.name.clone(),
+      "stem_name": stem.name.clone(),
+      "current": current_stem,
+      "total": total_stems,
+    }));
+
+    let source_path = Path::new(&stem.file_path);
+    let stem_id = stem.id.clone();
+
+    // Debug logging for cache investigation
+    log::info!("=== CACHE DEBUG for stem '{}' ===", stem.name);
+    log::info!("Song ID: {}", song_id);
+    log::info!("Stem ID: {}", stem_id);
+    log::info!("Source path: {:?}", source_path);
+    log::info!("Cache enabled: {}", state.cache_manager.is_enabled());
+
+    // Try to get cached file path first
+    let decode_path = if state.cache_manager.is_enabled() {
+      log::info!("Attempting cache lookup...");
+      match state.cache_manager.get(&song_id, &stem_id, source_path) {
+        Ok(Some(cached_path)) => {
+          log::info!("✓ CACHE HIT for {} - using cached file: {:?}", stem.name, cached_path);
+          cached_path
+        }
+        Ok(None) => {
+          log::info!("✗ CACHE MISS for {} - will decode from source and cache", stem.name);
+          source_path.to_path_buf()
+        }
+        Err(e) => {
+          log::error!("⚠ CACHE ERROR for {}: {} - decoding from source", stem.name, e);
+          source_path.to_path_buf()
+        }
+      }
+    } else {
+      log::info!("Cache is DISABLED - decoding directly from source");
+      source_path.to_path_buf()
+    };
+
+    // Decode from the chosen path (either cached or original)
+    let mut decoder = super::super::audio::decoder::AudioDecoder::new(decode_path.to_str().unwrap())
       .map_err(|e| format!("Failed to create decoder for '{}': {}", stem.name, e))?;
 
     let metadata = decoder.get_metadata()
@@ -46,7 +90,7 @@ pub async fn load_song(song_id: String, state: State<'_, AppState>) -> Result<()
       .map_err(|e| format!("Failed to decode '{}': {}", stem.name, e))?;
 
     // Resample if necessary
-    if metadata.sample_rate != 48000 {
+    let final_sample_rate = if metadata.sample_rate != 48000 {
       log::info!("Resampling {} from {}Hz to 48000Hz", stem.name, metadata.sample_rate);
       let mut resampler = super::super::audio::resampler::LinearResampler::new(
         metadata.sample_rate,
@@ -54,7 +98,27 @@ pub async fn load_song(song_id: String, state: State<'_, AppState>) -> Result<()
         metadata.channels,
       );
       samples = resampler.process(&samples);
+      48000
+    } else {
+      metadata.sample_rate
+    };
+
+    // If this was a cache miss, save the decoded audio to cache for next time
+    if decode_path == source_path && state.cache_manager.is_enabled() {
+      let duration = samples.len() as f64 / (final_sample_rate as f64 * metadata.channels as f64);
+      if let Err(e) = state.cache_manager.put(
+        &song_id,
+        &stem_id,
+        source_path,
+        duration,
+      ) {
+        log::warn!("Failed to write to persistent cache: {}", e);
+        // Continue anyway - we have the decoded samples
+      } else {
+        log::info!("Cached original file for future use");
+      }
     }
+
 
     cached_stems.push(super::CachedStem {
       stem_id: stem.id.clone(),
@@ -63,28 +127,31 @@ pub async fn load_song(song_id: String, state: State<'_, AppState>) -> Result<()
       is_muted: stem.is_muted,
     });
 
-    log::debug!("Cached stem '{}'", stem.name);
+    log::debug!("Cached stem '{}' in memory", stem.name);
   }
 
-  // Store in cache
+  // Store in memory cache
   let mut cache = state.song_cache.lock().map_err(|_| "Failed to lock cache")?;
   cache.insert(song_id.clone(), super::CachedSong {
     song_id: song_id.clone(),
     stems: cached_stems,
   });
 
-  log::info!("Successfully cached song '{}'", song.name);
+  log::info!("Successfully loaded song '{}' into memory", song.name);
+
+  // Emit completion event
+  let _ = app_handle.emit("stem:complete", serde_json::json!({}));
 
   Ok(())
 }
 
 /// Play a song from cache (load into audio engine and start playback)
 #[tauri::command]
-pub async fn play_song(song_id: String, state: State<'_, AppState>) -> Result<(), String> {
+pub async fn play_song(song_id: String, state: State<'_, AppState>, app_handle: tauri::AppHandle) -> Result<(), String> {
   log::info!("Playing song: {}", song_id);
 
   // Ensure song is cached (decode if needed)
-  load_song(song_id.clone(), state.clone()).await?;
+  load_song(song_id.clone(), state.clone(), app_handle).await?;
 
   // Get cached song data
   let cached_song = {
@@ -236,7 +303,7 @@ pub async fn preload_setlist(setlist_id: String, state: State<'_, AppState>, app
     log::info!("Preloading song {}/{}: {}", current, total, song.name);
 
     // Load song into cache (decode all stems)
-    if let Err(e) = load_song(song.id.clone(), state.clone()).await {
+    if let Err(e) = load_song(song.id.clone(), state.clone(), app_handle.clone()).await {
       log::warn!("Failed to preload song '{}': {}", song.name, e);
       // Continue with next song even if this one fails
     }

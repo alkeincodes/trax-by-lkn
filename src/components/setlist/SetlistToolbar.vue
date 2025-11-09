@@ -30,11 +30,16 @@ function handleDeleteSetlist() {
   }
 }
 
-function handleSelectSetlist(id: string) {
+async function handleSelectSetlist(id: string) {
   if (!id || id === '') {
     return
   }
-  setlistStore.loadSetlist(id)
+  try {
+    await setlistStore.loadSetlist(id)
+  } catch (error) {
+    console.error('Failed to load setlist:', error)
+    alert(`Failed to load setlist: ${error instanceof Error ? error.message : 'Unknown error'}`)
+  }
 }
 </script>
 

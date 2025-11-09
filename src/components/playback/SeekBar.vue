@@ -24,7 +24,7 @@ onMounted(() => {
     waveColor: '#4b5563',
     progressColor: '#3b82f6',
     cursorColor: '#3b82f6',
-    height: 64,
+    height: 130,
     barWidth: 2,
     barGap: 1,
     barRadius: 2,

@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-background: hsl(0 0% 100%);
+  --color-background: #010101;
   --color-foreground: hsl(222.2 84% 4.9%);
   --color-card: hsl(0 0% 100%);
   --color-card-foreground: hsl(222.2 84% 4.9%);
@@ -25,7 +25,7 @@
 
 @media (prefers-color-scheme: dark) {
   @theme {
-    --color-background: hsl(220 20% 8%);
+    --color-background: #010101;
     --color-foreground: hsl(210 40% 98%);
     --color-card: hsl(220 18% 12%);
     --color-card-foreground: hsl(210 40% 98%);
@@ -65,7 +65,7 @@ body {
 @layer base {
 
   .panel {
-    @apply bg-panel py-3 px-6 rounded-lg h-full flex items-center justify-center;
+    @apply bg-panel py-4 px-6 rounded-lg h-full flex items-center justify-center;
   }
 
 }
