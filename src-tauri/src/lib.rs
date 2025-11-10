@@ -1,5 +1,4 @@
 mod audio;
-mod cache;
 mod database;
 mod import;
 mod commands;
@@ -7,7 +6,6 @@ mod events;
 
 use std::sync::Arc;
 use audio::MultiTrackEngine;
-use cache::{CacheManager, CacheSettings};
 use database::Database;
 use commands::AppState;
 
@@ -32,31 +30,22 @@ pub fn run() {
 
     log::info!("Database initialized successfully");
 
-    // Initialize persistent cache
-    let cache_settings = CacheSettings::default();
-    let cache_manager = CacheManager::new(cache_settings)
-        .expect("Failed to initialize cache manager");
-
-    log::info!("Cache manager initialized successfully");
-
-    // Initialize multi-track audio engine with standard capacity (16 stems)
-    let audio_engine = MultiTrackEngine::new_standard()
+    // Initialize multi-track audio engine with extended capacity (32 stems)
+    // Uses parallel decoding for fast load times and full pre-decode for zero dropouts
+    let audio_engine = MultiTrackEngine::new_extended()
         .expect("Failed to initialize audio engine");
 
     log::info!("Audio engine initialized successfully");
 
     // Create shared application state
-    let app_state = AppState::new(database, audio_engine, cache_manager);
+    let app_state = AppState::new(database, audio_engine);
 
     // Clone the Arc references needed for position emitter (before moving app_state)
-    // We can't pass the whole audio_engine because it contains a non-Send Stream
-    let position_arc = {
+    let (position_arc, playback_state_arc) = {
         let engine = app_state.audio_engine.lock().unwrap();
-        engine.position_arc()
-    };
-    let playback_state_arc = {
-        let engine = app_state.audio_engine.lock().unwrap();
-        engine.playback_state_arc()
+        let pos = engine.position_arc();
+        let state = engine.playback_state_arc();
+        (pos, state)
     };
 
     tauri::Builder::default()

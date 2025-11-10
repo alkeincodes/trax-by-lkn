@@ -7,28 +7,21 @@ import { listen } from '@tauri-apps/api/event'
 const isOpen = ref(false)
 const currentSong = ref('')
 const currentStem = ref('')
-const currentIndex = ref(0)
-const totalSongs = ref(0)
+const currentStemIndex = ref(0)
 const totalStems = ref(0)
+const currentSongIndex = ref(0)
+const totalSongs = ref(0)
 
-const progress = computed(() => {
-  // For setlist preloading, use song progress
-  if (totalSongs.value > 0) {
-    return Math.round((currentIndex.value / totalSongs.value) * 100)
-  }
-  // For single song loading, use stem progress
+const stemProgress = computed(() => {
   if (totalStems.value > 0) {
-    return Math.round((currentIndex.value / totalStems.value) * 100)
+    return Math.round((currentStemIndex.value / totalStems.value) * 100)
   }
   return 0
 })
 
 const displayText = computed(() => {
-  if (totalSongs.value > 0) {
-    return `Song ${currentIndex.value} of ${totalSongs.value}`
-  }
   if (totalStems.value > 0) {
-    return `Stem ${currentIndex.value} of ${totalStems.value}`
+    return `Stem ${currentStemIndex.value} of ${totalStems.value}`
   }
   return ''
 })
@@ -38,9 +31,8 @@ listen('stem:loading', (event: any) => {
   isOpen.value = true
   currentSong.value = event.payload.song_name
   currentStem.value = event.payload.stem_name
-  currentIndex.value = event.payload.current
+  currentStemIndex.value = event.payload.current
   totalStems.value = event.payload.total
-  totalSongs.value = 0 // Clear song count
 })
 
 listen('stem:complete', () => {
@@ -49,7 +41,7 @@ listen('stem:complete', () => {
     isOpen.value = false
     currentSong.value = ''
     currentStem.value = ''
-    currentIndex.value = 0
+    currentStemIndex.value = 0
     totalStems.value = 0
   }, 500)
 })
@@ -58,10 +50,12 @@ listen('stem:complete', () => {
 listen('preload:progress', (event: any) => {
   isOpen.value = true
   currentSong.value = event.payload.song_name
-  currentIndex.value = event.payload.current
+  currentSongIndex.value = event.payload.current
   totalSongs.value = event.payload.total
-  totalStems.value = 0 // Clear stem count
+  // Reset stem progress for new song
   currentStem.value = ''
+  currentStemIndex.value = 0
+  totalStems.value = 0
 })
 
 listen('preload:complete', () => {
@@ -70,9 +64,10 @@ listen('preload:complete', () => {
     isOpen.value = false
     currentSong.value = ''
     currentStem.value = ''
-    currentIndex.value = 0
-    totalSongs.value = 0
+    currentStemIndex.value = 0
     totalStems.value = 0
+    currentSongIndex.value = 0
+    totalSongs.value = 0
   }, 500)
 })
 </script>
@@ -91,36 +86,53 @@ listen('preload:complete', () => {
           {{ totalSongs > 0 ? 'Preloading Setlist' : 'Loading Song' }}
         </h2>
 
-        <!-- Current Song -->
-        <p class="mb-1 text-sm font-medium text-foreground">
-          {{ currentSong }}
-        </p>
+        <!-- Setlist Loading: Show current song progress -->
+        <div v-if="totalSongs > 0" class="mb-4 w-full">
+          <p class="mb-2 text-sm font-medium text-foreground">
+            Song {{ currentSongIndex }} of {{ totalSongs }}
+          </p>
+          <p class="mb-4 text-xs text-muted-foreground">
+            {{ currentSong }}
+          </p>
+          <p class="text-xs text-muted-foreground">
+            Loading stems...
+          </p>
+        </div>
 
-        <!-- Current Stem (if loading stems) -->
-        <p v-if="currentStem" class="mb-4 text-xs text-muted-foreground">
-          Loading: {{ currentStem }}
-        </p>
-        <p v-else class="mb-4 text-xs text-muted-foreground">
-          &nbsp;
-        </p>
+        <!-- Single Song Loading: Show stem progress -->
+        <div v-else class="mb-4 w-full">
+          <p class="mb-1 text-sm font-medium text-foreground">
+            {{ currentSong }}
+          </p>
 
-        <!-- Progress Bar -->
-        <div class="w-full">
-          <div class="mb-2 flex items-center justify-between text-sm text-muted-foreground">
-            <span>{{ displayText }}</span>
-            <span>{{ progress }}%</span>
-          </div>
-          <div class="h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              class="h-full bg-primary transition-all duration-300"
-              :style="{ width: `${progress}%` }"
-            />
+          <!-- Current Stem -->
+          <p v-if="currentStem" class="mb-4 text-xs text-muted-foreground">
+            Loading: {{ currentStem }}
+          </p>
+          <p v-else class="mb-4 text-xs text-muted-foreground">
+            &nbsp;
+          </p>
+
+          <!-- Progress Bar (only for single song) -->
+          <div class="w-full">
+            <div class="mb-2 flex items-center justify-between text-sm text-muted-foreground">
+              <span>{{ displayText }}</span>
+              <span>{{ stemProgress }}%</span>
+            </div>
+            <div class="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                class="h-full bg-primary transition-all duration-300"
+                :style="{ width: `${stemProgress}%` }"
+              />
+            </div>
           </div>
         </div>
 
         <!-- Info -->
         <p class="mt-4 text-xs text-muted-foreground">
-          Please wait while we prepare your setlist for instant playback
+          {{ totalSongs > 0
+            ? 'Please wait while we prepare your setlist for instant playback'
+            : 'Preparing audio for playback...' }}
         </p>
       </div>
     </div>

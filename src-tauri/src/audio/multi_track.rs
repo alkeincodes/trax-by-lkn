@@ -59,8 +59,8 @@ pub struct MultiTrackEngine {
 
 struct Stem {
   id: usize,
-  // Pre-decoded audio samples (all in memory)
-  samples: Vec<f32>,
+  // Pre-decoded audio samples (shared via Arc - no copying!)
+  samples: Arc<Vec<f32>>,
   sample_rate: u32,
   channels: u16,
   duration: f64,
@@ -275,11 +275,12 @@ impl MultiTrackEngine {
       decoded_samples = resampler.process(&decoded_samples);
     }
 
-    self.load_stem_from_samples(&decoded_samples)
+    // Wrap in Arc for zero-copy loading
+    self.load_stem_from_samples(Arc::new(decoded_samples))
   }
 
   /// Load pre-decoded samples directly into the engine (from cache)
-  pub fn load_stem_from_samples(&mut self, samples: &[f32]) -> AudioResult<usize> {
+  pub fn load_stem_from_samples(&mut self, samples: Arc<Vec<f32>>) -> AudioResult<usize> {
     let mut stems = self.stems.lock().unwrap();
 
     let stem_id = stems
@@ -287,18 +288,20 @@ impl MultiTrackEngine {
       .position(|s| s.is_none())
       .ok_or_else(|| AudioError::PlaybackError("No available stem slots".to_string()))?;
 
+    let duration = samples.len() as f64 / (TARGET_SAMPLE_RATE as f64 * 2.0);
+
     let stem = Stem {
       id: stem_id,
-      samples: samples.to_vec(),
+      samples, // No copying - just share the Arc!
       sample_rate: TARGET_SAMPLE_RATE,
       channels: 2, // Assuming stereo
-      duration: samples.len() as f64 / (TARGET_SAMPLE_RATE as f64 * 2.0),
+      duration,
     };
 
     stems[stem_id] = Some(stem);
     drop(stems);
 
-    log::info!("Successfully loaded stem from samples at index {}", stem_id);
+    log::info!("Successfully loaded stem from samples at index {} (zero-copy)", stem_id);
 
     Ok(stem_id)
   }

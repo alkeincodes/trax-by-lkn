@@ -43,7 +43,27 @@ export const usePlaybackStore = defineStore('playback', () => {
 
   // Actions
   async function selectSong(song: Song) {
+    // If a different song is currently playing or loaded, stop it first
+    if (currentSong.value && currentSong.value.id !== song.id) {
+      if (isPlaying.value) {
+        await stop()
+      } else {
+        // Song was paused - stop the backend playback to reset its position
+        try {
+          await invoke('stop_playback')
+        } catch (e) {
+          console.error('Failed to stop backend playback:', e)
+        }
+        // Clear the current song so play button loads the new one
+        setCurrentSong(null)
+        stopPositionAnimation()
+      }
+    }
+
     selectedSong.value = song
+
+    // Always reset position when selecting a new song
+    currentPosition.value = 0
 
     // Fetch stems for the selected song
     isLoadingStems.value = true
@@ -60,18 +80,25 @@ export const usePlaybackStore = defineStore('playback', () => {
   async function playSong(songId: string) {
     isLoadingStems.value = true
     try {
-      // Fetch song details
-      const song = await invoke<Song>('get_song', { songId })
+      // Use selectedSong if it matches, otherwise fetch from database
+      let song = selectedSong.value
+      if (!song || song.id !== songId) {
+        song = await invoke<Song>('get_song', { songId })
+      }
       setCurrentSong(song)
 
-      // Fetch stems for the song
-      const songStems = await invoke<Stem[]>('get_song_stems', { songId })
-      setStems(songStems)
+      // Use existing stems if available, otherwise fetch
+      if (stems.value.length === 0 || stems.value[0]?.song_id !== songId) {
+        const songStems = await invoke<Stem[]>('get_song_stems', { songId })
+        setStems(songStems)
+      }
 
-      // Start playback
+      // Start playback - backend uses cached decoded audio
+      console.log('🎵 Starting playback for:', song.name)
       await invoke('play_song', { songId })
       isPlaying.value = true
       startPositionAnimation()
+      console.log('✅ Playback started successfully')
     } catch (e) {
       console.error('Failed to play song:', e)
       throw e

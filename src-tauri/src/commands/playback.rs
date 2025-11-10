@@ -31,104 +31,94 @@ pub async fn load_song(song_id: String, state: State<'_, AppState>, app_handle: 
   }
 
   let total_stems = stems.len();
+  log::info!("Loading {} stems in PARALLEL...", total_stems);
 
-  // Decode all stems and cache them
-  let mut cached_stems = Vec::new();
+  // Spawn parallel decoding tasks for all stems
+  let mut decode_tasks = Vec::new();
 
   for (index, stem) in stems.iter().enumerate() {
     let current_stem = index + 1;
-    log::info!("Loading stem {}/{}: {}", current_stem, total_stems, stem.name);
-
-    // Emit progress event to frontend
-    let _ = app_handle.emit("stem:loading", serde_json::json!({
-      "song_name": song.name.clone(),
-      "stem_name": stem.name.clone(),
-      "current": current_stem,
-      "total": total_stems,
-    }));
-
-    let source_path = Path::new(&stem.file_path);
+    let song_id = song_id.clone();
+    let song_name = song.name.clone();
+    let stem_name = stem.name.clone();
     let stem_id = stem.id.clone();
+    let stem_file_path = stem.file_path.clone();
+    let stem_volume = stem.volume;
+    let stem_is_muted = stem.is_muted;
+    let app_handle_clone = app_handle.clone();
 
-    // Debug logging for cache investigation
-    log::info!("=== CACHE DEBUG for stem '{}' ===", stem.name);
-    log::info!("Song ID: {}", song_id);
-    log::info!("Stem ID: {}", stem_id);
-    log::info!("Source path: {:?}", source_path);
-    log::info!("Cache enabled: {}", state.cache_manager.is_enabled());
+    // Spawn blocking task for CPU-intensive decoding
+    let task = tokio::task::spawn_blocking(move || {
+      log::info!("⚙️  PARALLEL: Starting decode for stem {}/{}: {}", current_stem, total_stems, stem_name);
 
-    // Try to get cached file path first
-    let decode_path = if state.cache_manager.is_enabled() {
-      log::info!("Attempting cache lookup...");
-      match state.cache_manager.get(&song_id, &stem_id, source_path) {
-        Ok(Some(cached_path)) => {
-          log::info!("✓ CACHE HIT for {} - using cached file: {:?}", stem.name, cached_path);
-          cached_path
-        }
-        Ok(None) => {
-          log::info!("✗ CACHE MISS for {} - will decode from source and cache", stem.name);
-          source_path.to_path_buf()
-        }
-        Err(e) => {
-          log::error!("⚠ CACHE ERROR for {}: {} - decoding from source", stem.name, e);
-          source_path.to_path_buf()
-        }
-      }
-    } else {
-      log::info!("Cache is DISABLED - decoding directly from source");
-      source_path.to_path_buf()
-    };
+      // Emit progress event to frontend
+      let _ = app_handle_clone.emit("stem:loading", serde_json::json!({
+        "song_name": song_name,
+        "stem_name": stem_name.clone(),
+        "current": current_stem,
+        "total": total_stems,
+      }));
 
-    // Decode from the chosen path (either cached or original)
-    let mut decoder = super::super::audio::decoder::AudioDecoder::new(decode_path.to_str().unwrap())
-      .map_err(|e| format!("Failed to create decoder for '{}': {}", stem.name, e))?;
+      let source_path = Path::new(&stem_file_path);
 
-    let metadata = decoder.get_metadata()
-      .map_err(|e| format!("Failed to get metadata for '{}': {}", stem.name, e))?;
+      // Decode directly from original file
+      let mut decoder = super::super::audio::decoder::AudioDecoder::new(source_path.to_str().unwrap())
+        .map_err(|e| format!("Failed to create decoder for '{}': {}", stem_name, e))?;
 
-    let mut samples = decoder.decode_all()
-      .map_err(|e| format!("Failed to decode '{}': {}", stem.name, e))?;
+      let metadata = decoder.get_metadata()
+        .map_err(|e| format!("Failed to get metadata for '{}': {}", stem_name, e))?;
 
-    // Resample if necessary
-    let final_sample_rate = if metadata.sample_rate != 48000 {
-      log::info!("Resampling {} from {}Hz to 48000Hz", stem.name, metadata.sample_rate);
-      let mut resampler = super::super::audio::resampler::LinearResampler::new(
-        metadata.sample_rate,
-        48000,
-        metadata.channels,
-      );
-      samples = resampler.process(&samples);
-      48000
-    } else {
-      metadata.sample_rate
-    };
+      let mut samples = decoder.decode_all()
+        .map_err(|e| format!("Failed to decode '{}': {}", stem_name, e))?;
 
-    // If this was a cache miss, save the decoded audio to cache for next time
-    if decode_path == source_path && state.cache_manager.is_enabled() {
-      let duration = samples.len() as f64 / (final_sample_rate as f64 * metadata.channels as f64);
-      if let Err(e) = state.cache_manager.put(
-        &song_id,
-        &stem_id,
-        source_path,
-        duration,
-      ) {
-        log::warn!("Failed to write to persistent cache: {}", e);
-        // Continue anyway - we have the decoded samples
+      // Resample if necessary
+      let _final_sample_rate = if metadata.sample_rate != 48000 {
+        log::info!("Resampling {} from {}Hz to 48000Hz", stem_name, metadata.sample_rate);
+        let mut resampler = super::super::audio::resampler::LinearResampler::new(
+          metadata.sample_rate,
+          48000,
+          metadata.channels,
+        );
+        samples = resampler.process(&samples);
+        48000
       } else {
-        log::info!("Cached original file for future use");
-      }
-    }
+        metadata.sample_rate
+      };
 
+      log::info!("✅ PARALLEL: Completed decode for stem {}/{}: {}", current_stem, total_stems, stem_name);
 
-    cached_stems.push(super::CachedStem {
-      stem_id: stem.id.clone(),
-      samples,
-      volume: stem.volume as f32,
-      is_muted: stem.is_muted,
+      Ok::<_, String>(super::CachedStem {
+        stem_id,
+        samples: std::sync::Arc::new(samples), // Wrap in Arc for zero-copy
+        volume: stem_volume as f32,
+        is_muted: stem_is_muted,
+      })
     });
 
-    log::debug!("Cached stem '{}' in memory", stem.name);
+    decode_tasks.push(task);
   }
+
+  // Wait for all parallel decoding tasks to complete
+  log::info!("⏳ Waiting for {} parallel decode tasks to complete...", decode_tasks.len());
+  let results = futures::future::join_all(decode_tasks).await;
+
+  // Collect results and check for errors
+  let mut cached_stems = Vec::new();
+  for (index, result) in results.into_iter().enumerate() {
+    match result {
+      Ok(Ok(cached_stem)) => {
+        cached_stems.push(cached_stem);
+      }
+      Ok(Err(e)) => {
+        return Err(format!("Failed to decode stem {}: {}", index + 1, e));
+      }
+      Err(e) => {
+        return Err(format!("Task panic for stem {}: {}", index + 1, e));
+      }
+    }
+  }
+
+  log::info!("✅ All {} stems decoded successfully in parallel!", cached_stems.len());
 
   // Store in memory cache
   let mut cache = state.song_cache.lock().map_err(|_| "Failed to lock cache")?;
@@ -175,10 +165,10 @@ pub async fn play_song(song_id: String, state: State<'_, AppState>, app_handle: 
     .map_err(|_| "Failed to lock stem ID map")?;
   stem_map.clear();
 
-  // Load cached stems into the engine
+  // Load cached stems into the engine (zero-copy via Arc)
   for cached_stem in &cached_song.stems {
     let stem_index = engine
-      .load_stem_from_samples(&cached_stem.samples)
+      .load_stem_from_samples(cached_stem.samples.clone()) // Clone the Arc (cheap reference count bump)
       .map_err(|e| format!("Failed to load cached stem: {}", e))?;
 
     // Map the database stem ID to the engine stem index
@@ -302,7 +292,7 @@ pub async fn preload_setlist(setlist_id: String, state: State<'_, AppState>, app
 
     log::info!("Preloading song {}/{}: {}", current, total, song.name);
 
-    // Load song into cache (decode all stems)
+    // Load song into cache (decode all stems in parallel)
     if let Err(e) = load_song(song.id.clone(), state.clone(), app_handle.clone()).await {
       log::warn!("Failed to preload song '{}': {}", song.name, e);
       // Continue with next song even if this one fails

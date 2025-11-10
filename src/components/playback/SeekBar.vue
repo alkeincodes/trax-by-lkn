@@ -111,6 +111,12 @@ onMounted(() => {
                 if (waveDuration > 0 && playbackStore.selectedSong && playbackStore.selectedSong.duration === 0) {
                   playbackStore.selectedSong.duration = waveDuration
                 }
+                // Reset waveform position to match store position (should be 0 for new songs)
+                if (wavesurfer) {
+                  const storePosition = playbackStore.currentPosition
+                  const seekPosition = storePosition / waveDuration
+                  wavesurfer.seekTo(seekPosition)
+                }
                 // Clean up blob URL after loading
                 URL.revokeObjectURL(blobUrl)
               })
