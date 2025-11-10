@@ -14,6 +14,7 @@ export const usePlaybackStore = defineStore('playback', () => {
   const stems = ref<Stem[]>([])
   const volume = ref(0.8)
   const isLoadingStems = ref(false)
+  const masterLevel = ref(0)
 
   // Client-side position interpolation
   let animationFrameId: number | null = null
@@ -192,10 +193,13 @@ export const usePlaybackStore = defineStore('playback', () => {
 
   async function toggleStemSolo(stemId: string) {
     try {
-      await invoke('toggle_stem_solo', { stemId })
+      const newSoloState = await invoke<boolean>('toggle_stem_solo', { stemId })
 
-      // Note: Solo state is not stored in Stem interface
-      // Backend will handle solo logic (muting all other stems)
+      // Update local solo state with the value returned from backend
+      const stem = stems.value.find(s => s.id === stemId)
+      if (stem) {
+        stem.is_solo = newSoloState
+      }
     } catch (e) {
       console.error('Failed to toggle stem solo:', e)
       throw e
@@ -290,6 +294,22 @@ export const usePlaybackStore = defineStore('playback', () => {
     listen('playback:state', (event: any) => {
       updatePlaybackState(event.payload.is_playing)
     })
+
+    // Listen for stem level updates
+    listen('playback:levels', (event: any) => {
+      updateStemLevels(event.payload)
+    })
+  }
+
+  function updateStemLevels(payload: { levels: number[], master: number }) {
+    // Update level for each stem
+    stems.value.forEach((stem, index) => {
+      if (index < payload.levels.length) {
+        stem.level = payload.levels[index]
+      }
+    })
+    // Update master level
+    masterLevel.value = payload.master
   }
 
   return {
@@ -302,6 +322,7 @@ export const usePlaybackStore = defineStore('playback', () => {
     stems,
     volume,
     isLoadingStems,
+    masterLevel,
 
     // Getters
     formattedPosition,

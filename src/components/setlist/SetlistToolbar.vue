@@ -51,6 +51,11 @@ async function handleSelectSetlist(id: string) {
     alert(`Failed to load setlist: ${error instanceof Error ? error.message : 'Unknown error'}`)
   }
 }
+
+const openAddSongToSetlistModal = () => {
+  if(!setlistStore.currentSetlist) return;
+  modalStore.openModal('add-song-to-setlist')
+}
 </script>
 
 <template>
@@ -60,7 +65,7 @@ async function handleSelectSetlist(id: string) {
       <DropdownMenuRoot>
         <DropdownMenuTrigger as-child>
           <button
-            class="w-full flex items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-foreground hover:bg-accent hover:text-accent-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+            class="w-full flex items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-foreground hover:bg-accent hover:text-accent-foreground focus:border-transparent focus:outline-none focus:ring-1 focus:ring-transparent transition-colors"
           >
             <span class="text-sm">
               {{ setlistStore.currentSetlist?.name || 'Select a setlist' }}
@@ -71,22 +76,9 @@ async function handleSelectSetlist(id: string) {
 
         <DropdownMenuPortal>
           <DropdownMenu :side-offset="4" align="start" class="w-[var(--radix-dropdown-menu-trigger-width)]">
-            <template v-if="showRecentSetlists">
-              <DropdownMenuLabel>Recent</DropdownMenuLabel>
-              <DropdownMenuGroup>
-                <DropdownMenuItem
-                  v-for="setlist in setlistStore.recentSetlists"
-                  :key="setlist.id"
-                  @select="() => handleSelectSetlist(setlist.id)"
-                >
-                  {{ setlist.name }}
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </template>
-
             <template v-if="setlistStore.allSetlists.length > 0">
               <DropdownMenuSeparator v-if="showRecentSetlists" />
-              <DropdownMenuLabel>All Setlists</DropdownMenuLabel>
+              <DropdownMenuLabel class="text-white/20 text-xs font-normal">All Setlists</DropdownMenuLabel>
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   v-for="setlist in setlistStore.allSetlists"
@@ -94,6 +86,13 @@ async function handleSelectSetlist(id: string) {
                   @select="() => handleSelectSetlist(setlist.id)"
                 >
                   {{ setlist.name }}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                    @select="modalStore.openModal('new-setlist')"
+                >
+                  <Plus :size="16" class="mr-2" />
+                  Create a Setlist
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </template>
@@ -111,9 +110,13 @@ async function handleSelectSetlist(id: string) {
 <!--      </div>-->
 
       <!-- New Setlist Button -->
-      <Button variant="default" size="sm" @click="handleNewSetlist">
-        <Plus :size="16" class="mr-1" />
-        New
+      <Button
+          variant="secondary"
+          size="sm"
+          :disabled="!setlistStore.currentSetlist"
+          @click="openAddSongToSetlistModal"
+      >
+        <Plus :size="16" />
       </Button>
 
       <!-- Delete Setlist Button -->

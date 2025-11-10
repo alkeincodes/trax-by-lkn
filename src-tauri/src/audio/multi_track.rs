@@ -52,6 +52,9 @@ pub struct MultiTrackEngine {
   stem_volumes: Vec<Arc<std::sync::atomic::AtomicU32>>,
   stem_mutes: Vec<Arc<AtomicBool>>,
   stem_solos: Vec<Arc<AtomicBool>>,
+  stem_levels: Vec<Arc<std::sync::atomic::AtomicU32>>,
+  master_volume: Arc<std::sync::atomic::AtomicU32>,
+  master_level: Arc<std::sync::atomic::AtomicU32>,
   playback_state: Arc<Mutex<PlaybackState>>,
   position: Arc<AtomicU64>,
   stream: Option<Stream>,
@@ -115,17 +118,21 @@ impl MultiTrackEngine {
     let mut stem_volumes = Vec::with_capacity(max_stems);
     let mut stem_mutes = Vec::with_capacity(max_stems);
     let mut stem_solos = Vec::with_capacity(max_stems);
+    let mut stem_levels = Vec::with_capacity(max_stems);
 
     for _ in 0..max_stems {
       stems_vec.push(None);
       stem_volumes.push(Arc::new(std::sync::atomic::AtomicU32::new(f32::to_bits(1.0))));
       stem_mutes.push(Arc::new(AtomicBool::new(false)));
       stem_solos.push(Arc::new(AtomicBool::new(false)));
+      stem_levels.push(Arc::new(std::sync::atomic::AtomicU32::new(f32::to_bits(0.0))));
     }
 
     let stems = Arc::new(Mutex::new(stems_vec));
     let playback_state = Arc::new(Mutex::new(PlaybackState::Stopped));
     let position = Arc::new(AtomicU64::new(0));
+    let master_volume = Arc::new(std::sync::atomic::AtomicU32::new(f32::to_bits(1.0))); // Default to 100%
+    let master_level = Arc::new(std::sync::atomic::AtomicU32::new(f32::to_bits(0.0)));
 
     let mut engine = Self {
       max_stems,
@@ -133,6 +140,9 @@ impl MultiTrackEngine {
       stem_volumes,
       stem_mutes,
       stem_solos,
+      stem_levels,
+      master_volume,
+      master_level,
       playback_state: playback_state.clone(),
       position: position.clone(),
       stream: None,
@@ -157,6 +167,9 @@ impl MultiTrackEngine {
     let stem_volumes: Vec<_> = self.stem_volumes.iter().cloned().collect();
     let stem_mutes: Vec<_> = self.stem_mutes.iter().cloned().collect();
     let stem_solos: Vec<_> = self.stem_solos.iter().cloned().collect();
+    let stem_levels: Vec<_> = self.stem_levels.iter().cloned().collect();
+    let master_volume = self.master_volume.clone();
+    let master_level = self.master_level.clone();
 
     let err_fn = |err| log::error!("Audio stream error: {}", err);
 
@@ -164,7 +177,7 @@ impl MultiTrackEngine {
       .build_output_stream(
         &config,
         move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-          Self::audio_callback(data, &stems, &playback_state, &position, &stem_volumes, &stem_mutes, &stem_solos);
+          Self::audio_callback(data, &stems, &playback_state, &position, &stem_volumes, &stem_mutes, &stem_solos, &stem_levels, &master_volume, &master_level);
         },
         err_fn,
         None,
@@ -188,10 +201,18 @@ impl MultiTrackEngine {
     stem_volumes: &[Arc<std::sync::atomic::AtomicU32>],
     stem_mutes: &[Arc<AtomicBool>],
     stem_solos: &[Arc<AtomicBool>],
+    stem_levels: &[Arc<std::sync::atomic::AtomicU32>],
+    master_volume: &Arc<std::sync::atomic::AtomicU32>,
+    master_level: &Arc<std::sync::atomic::AtomicU32>,
   ) {
     let state = playback_state.lock().unwrap();
     if *state != PlaybackState::Playing {
       output.fill(0.0);
+      // Reset all levels to 0 when not playing
+      for level in stem_levels {
+        level.store(f32::to_bits(0.0), Ordering::Release);
+      }
+      master_level.store(f32::to_bits(0.0), Ordering::Release);
       return;
     }
     drop(state);
@@ -224,14 +245,38 @@ impl MultiTrackEngine {
           // Read directly from pre-decoded samples
           let samples_to_copy = output.len().min(stem.samples.len().saturating_sub(current_position));
 
+          let mut peak = 0.0f32;
           for i in 0..samples_to_copy {
-            output[i] += stem.samples[current_position + i] * volume;
+            let sample = stem.samples[current_position + i] * volume;
+            output[i] += sample;
+            // Track peak level
+            peak = peak.max(sample.abs());
           }
+
+          // Store peak level for this stem
+          stem_levels[idx].store(f32::to_bits(peak), Ordering::Release);
+        } else {
+          // Stem is muted or not soloed, set level to 0
+          stem_levels[idx].store(f32::to_bits(0.0), Ordering::Release);
         }
+      } else {
+        // No stem loaded, set level to 0
+        stem_levels[idx].store(f32::to_bits(0.0), Ordering::Release);
       }
     }
 
     drop(stems_guard);
+
+    // Apply master volume to the final mixed output
+    let master_vol_bits = master_volume.load(Ordering::Acquire);
+    let master_vol = f32::from_bits(master_vol_bits);
+
+    let mut master_peak = 0.0f32;
+    for sample in output.iter_mut() {
+      *sample *= master_vol;
+      master_peak = master_peak.max(sample.abs());
+    }
+    master_level.store(f32::to_bits(master_peak), Ordering::Release);
 
     // Advance position by the number of samples we output
     let new_position = current_position + output.len();
@@ -346,6 +391,16 @@ impl MultiTrackEngine {
     }
   }
 
+  pub fn set_master_volume(&mut self, volume: f32) {
+    let clamped_volume = volume.clamp(0.0, 1.0);
+    self.master_volume.store(f32::to_bits(clamped_volume), Ordering::Release);
+  }
+
+  pub fn master_volume(&self) -> f32 {
+    let bits = self.master_volume.load(Ordering::Acquire);
+    f32::from_bits(bits)
+  }
+
   pub fn set_stem_mute(&mut self, stem_id: usize, muted: bool) {
     if stem_id >= self.max_stems {
       return;
@@ -426,6 +481,29 @@ impl MultiTrackEngine {
   /// Get a clone of the playback state Arc for cross-thread access
   pub fn playback_state_arc(&self) -> Arc<Mutex<PlaybackState>> {
     self.playback_state.clone()
+  }
+
+  /// Get current peak levels for all stems (0.0 to 1.0+)
+  pub fn get_stem_levels(&self) -> Vec<f32> {
+    self.stem_levels
+      .iter()
+      .map(|level| f32::from_bits(level.load(Ordering::Acquire)))
+      .collect()
+  }
+
+  /// Get a clone of the stem levels Arc for cross-thread access
+  pub fn stem_levels_arc(&self) -> Vec<Arc<std::sync::atomic::AtomicU32>> {
+    self.stem_levels.clone()
+  }
+
+  /// Get current master output peak level (0.0 to 1.0+)
+  pub fn get_master_level(&self) -> f32 {
+    f32::from_bits(self.master_level.load(Ordering::Acquire))
+  }
+
+  /// Get a clone of the master level Arc for cross-thread access
+  pub fn master_level_arc(&self) -> Arc<std::sync::atomic::AtomicU32> {
+    self.master_level.clone()
   }
 }
 

@@ -88,7 +88,7 @@ pub async fn toggle_stem_mute(
 pub async fn toggle_stem_solo(
   stem_id: String,
   state: State<'_, AppState>
-) -> Result<(), String> {
+) -> Result<bool, String> {
   log::debug!("Toggling solo for stem {}", stem_id);
 
   // Get the engine stem index
@@ -106,9 +106,31 @@ pub async fn toggle_stem_solo(
     .map_err(|_| "Failed to lock audio engine")?;
 
   let current_solo = engine.is_stem_soloed(*stem_index);
-  engine.set_stem_solo(*stem_index, !current_solo);
+  let new_solo = !current_solo;
+  engine.set_stem_solo(*stem_index, new_solo);
 
   // Note: Solo state is not persisted in database (it's ephemeral)
+
+  Ok(new_solo)
+}
+
+/// Set the master volume (0.0 to 1.0)
+#[tauri::command]
+pub async fn set_master_volume(
+  volume: f64,
+  state: State<'_, AppState>
+) -> Result<(), String> {
+  log::debug!("Setting master volume to {}", volume);
+
+  // Clamp volume to valid range
+  let clamped_volume = volume.clamp(0.0, 1.0);
+
+  // Update the audio engine
+  let mut engine = state.audio_engine
+    .lock()
+    .map_err(|_| "Failed to lock audio engine")?;
+
+  engine.set_master_volume(clamped_volume as f32);
 
   Ok(())
 }

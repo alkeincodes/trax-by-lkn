@@ -39,7 +39,7 @@ onMounted(() => {
     </div>
 
     <!-- Main Content -->
-    <main class="flex flex-1 overflow-hidden p-6">
+    <main class="flex gap-4 flex-1 overflow-hidden p-6">
       <!-- Setlist View -->
       <div class="flex flex-col gap-4">
         <div class="panel p-0">
@@ -53,12 +53,8 @@ onMounted(() => {
       <!-- Library View -->
       <div class="flex-1 overflow-hidden">
 <!--        <LibraryView />-->
-      </div>
-
-      <!-- Stem Mixer Sidebar -->
-      <aside class="w-80 border-l border-border p-4">
         <StemMixer />
-      </aside>
+      </div>
     </main>
 
     <!-- Modals -->

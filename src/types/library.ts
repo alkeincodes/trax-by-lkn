@@ -24,6 +24,8 @@ export interface Stem {
   duration: number
   volume: number
   is_muted: boolean
+  level?: number // Peak audio level (0.0 to 1.0+), updated in real-time
+  is_solo?: boolean // Solo state (frontend only, not persisted)
 }
 
 // Filter options for library queries

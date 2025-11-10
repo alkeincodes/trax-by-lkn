@@ -41,11 +41,13 @@ pub fn run() {
     let app_state = AppState::new(database, audio_engine);
 
     // Clone the Arc references needed for position emitter (before moving app_state)
-    let (position_arc, playback_state_arc) = {
+    let (position_arc, playback_state_arc, stem_levels_arc, master_level_arc) = {
         let engine = app_state.audio_engine.lock().unwrap();
         let pos = engine.position_arc();
         let state = engine.playback_state_arc();
-        (pos, state)
+        let levels = engine.stem_levels_arc();
+        let master = engine.master_level_arc();
+        (pos, state, levels, master)
     };
 
     tauri::Builder::default()
@@ -55,7 +57,7 @@ pub fn run() {
         .setup(move |app| {
             let app_handle = app.handle().clone();
             // Start the position emitter background task
-            events::start_position_emitter(app_handle, position_arc, playback_state_arc);
+            events::start_position_emitter(app_handle, position_arc, playback_state_arc, stem_levels_arc, master_level_arc);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -73,6 +75,7 @@ pub fn run() {
             commands::set_stem_volume,
             commands::toggle_stem_mute,
             commands::toggle_stem_solo,
+            commands::set_master_volume,
             commands::get_current_stems,
             // Library commands
             commands::import_files,
