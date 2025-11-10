@@ -171,6 +171,46 @@ Components follow the shadcn pattern (see `src/components/ui/Button.vue`):
 - Follow Button.vue pattern for variants and props
 - Use theme colors via `hsl(var(--color-*))`
 
+### Selection Inputs
+For dropdown/select functionality, use the DropdownMenu component from radix-vue instead of native `<select>` elements:
+
+```vue
+<script setup>
+import {
+  DropdownMenuRoot,
+  DropdownMenuTrigger,
+  DropdownMenuPortal,
+  DropdownMenuGroup,
+} from 'radix-vue'
+import DropdownMenu from '@/components/ui/DropdownMenu.vue'
+import DropdownMenuItem from '@/components/ui/DropdownMenuItem.vue'
+import DropdownMenuLabel from '@/components/ui/DropdownMenuLabel.vue'
+import DropdownMenuSeparator from '@/components/ui/DropdownMenuSeparator.vue'
+</script>
+
+<template>
+  <DropdownMenuRoot>
+    <DropdownMenuTrigger as-child>
+      <button>Select option</button>
+    </DropdownMenuTrigger>
+    <DropdownMenuPortal>
+      <DropdownMenu>
+        <DropdownMenuLabel>Label</DropdownMenuLabel>
+        <DropdownMenuItem @select="handleSelect">Option 1</DropdownMenuItem>
+      </DropdownMenu>
+    </DropdownMenuPortal>
+  </DropdownMenuRoot>
+</template>
+```
+
+**Benefits**:
+- Consistent styling with design system
+- Better accessibility with keyboard navigation
+- Smooth animations and transitions
+- More flexible styling options than native selects
+
+**Example**: See `src/components/setlist/SetlistToolbar.vue` for implementation reference.
+
 ### Modal Pattern
 All modals follow this pattern:
 1. **Base Component**: Use `src/components/ui/Modal.vue` for overlay, backdrop, and focus trap

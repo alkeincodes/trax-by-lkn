@@ -66,6 +66,8 @@ function handleDropZoneDrop(e: DragEvent) {
 }
 
 async function handleSongSelect(song: Song) {
+
+
   try {
     await playbackStore.selectSong(song)
   } catch (error) {
@@ -79,7 +81,7 @@ function handleNewSetlist() {
 </script>
 
 <template>
-  <div class="flex h-full flex-col">
+  <div class="flex h-full flex-col min-w-[500px]">
     <!-- Toolbar -->
     <SetlistToolbar />
 
@@ -124,12 +126,11 @@ function handleNewSetlist() {
           <!-- Add Song Button -->
           <div class="mb-3 flex justify-end">
             <Button
-              variant="default"
+              variant="secondary"
               size="sm"
               @click="modalStore.openModal('add-song-to-setlist')"
             >
-              <Plus :size="16" class="mr-1" />
-              Add Songs
+              <Plus :size="16" />
             </Button>
           </div>
 

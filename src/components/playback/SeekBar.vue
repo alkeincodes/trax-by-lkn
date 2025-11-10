@@ -183,11 +183,11 @@ onUnmounted(() => {
   <div class="relative w-full">
     <div
       v-if="!hasSong"
-      class="flex h-16 w-full items-center justify-center rounded-lg bg-secondary/50 text-sm text-muted-foreground"
+      class="flex min-h-[130px] w-full items-center justify-center rounded-lg bg-secondary/50 text-sm text-muted-foreground"
     >
       Select a song to see waveform
     </div>
-    <div v-else-if="isLoading" class="flex h-16 w-full items-center justify-center">
+    <div v-else-if="isLoading" class="flex min-h-[130px] w-full items-center justify-center">
       <span class="text-sm text-muted-foreground">Loading waveform...</span>
     </div>
     <div v-show="hasSong && !isLoading" ref="waveformContainer" class="w-full cursor-pointer" />

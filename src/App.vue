@@ -10,16 +10,21 @@ import SettingsModal from '@/components/modals/SettingsModal.vue'
 import PlaybackControls from '@/components/playback/PlaybackControls.vue'
 import SeekBar from '@/components/playback/SeekBar.vue'
 import StemMixer from '@/components/playback/StemMixer.vue'
+import DronePad from '@/components/playback/DronePad.vue'
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 import { usePlaybackStore } from '@/stores/playback'
+import { useLibraryStore } from '@/stores/library'
 
 // Initialize keyboard shortcuts
 useKeyboardShortcuts()
 
-// Initialize playback store event listeners
+// Initialize stores
 const playbackStore = usePlaybackStore()
+const libraryStore = useLibraryStore()
+
 onMounted(() => {
   playbackStore.initializeEventListeners()
+  libraryStore.fetchSongs()
 })
 </script>
 
@@ -34,15 +39,20 @@ onMounted(() => {
     </div>
 
     <!-- Main Content -->
-    <main class="flex flex-1 overflow-hidden">
+    <main class="flex flex-1 overflow-hidden p-6">
       <!-- Setlist View -->
-      <div class="w-96 border-r border-border">
-        <SetlistView />
+      <div class="flex flex-col gap-4">
+        <div class="panel p-0">
+          <SetlistView />
+        </div>
+        <div class="border-border panel p-4">
+          <DronePad />
+        </div>
       </div>
 
       <!-- Library View -->
       <div class="flex-1 overflow-hidden">
-        <LibraryView />
+<!--        <LibraryView />-->
       </div>
 
       <!-- Stem Mixer Sidebar -->

@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Plus, Trash2, Save, ChevronDown } from 'lucide-vue-next'
+import { Plus, Trash2, ChevronDown } from 'lucide-vue-next'
 import Button from '@/components/ui/Button.vue'
+import {
+  DropdownMenuRoot,
+  DropdownMenuTrigger,
+  DropdownMenuPortal,
+  DropdownMenuGroup,
+} from 'radix-vue'
+import DropdownMenu from '@/components/ui/DropdownMenu.vue'
+import DropdownMenuItem from '@/components/ui/DropdownMenuItem.vue'
+import DropdownMenuLabel from '@/components/ui/DropdownMenuLabel.vue'
+import DropdownMenuSeparator from '@/components/ui/DropdownMenuSeparator.vue'
 import { useSetlistStore } from '@/stores/setlist'
 import { useModalStore } from '@/stores/modal'
 
@@ -47,45 +57,58 @@ async function handleSelectSetlist(id: string) {
   <div class="flex items-center gap-3 border-b border-border px-4 py-3">
     <!-- Setlist Dropdown -->
     <div class="flex-1">
-      <div class="relative">
-        <select
-          :value="setlistStore.currentSetlist?.id || ''"
-          class="w-full appearance-none rounded-md border border-border bg-background px-3 py-2 pr-8 text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          @change="(e) => handleSelectSetlist((e.target as HTMLSelectElement).value)"
-        >
-          <option value="" disabled>Select a setlist</option>
-          <optgroup v-if="showRecentSetlists" label="Recent">
-            <option
-              v-for="setlist in setlistStore.recentSetlists"
-              :key="setlist.id"
-              :value="setlist.id"
-            >
-              {{ setlist.name }}
-            </option>
-          </optgroup>
-          <optgroup v-if="setlistStore.allSetlists.length > 0" label="All Setlists">
-            <option
-              v-for="setlist in setlistStore.allSetlists"
-              :key="setlist.id"
-              :value="setlist.id"
-            >
-              {{ setlist.name }}
-            </option>
-          </optgroup>
-        </select>
-        <div class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
-          <ChevronDown :size="16" class="text-muted-foreground" />
-        </div>
-      </div>
+      <DropdownMenuRoot>
+        <DropdownMenuTrigger as-child>
+          <button
+            class="w-full flex items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-foreground hover:bg-accent hover:text-accent-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary transition-colors"
+          >
+            <span class="text-sm">
+              {{ setlistStore.currentSetlist?.name || 'Select a setlist' }}
+            </span>
+            <ChevronDown :size="16" class="text-muted-foreground ml-2" />
+          </button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuPortal>
+          <DropdownMenu :side-offset="4" align="start" class="w-[var(--radix-dropdown-menu-trigger-width)]">
+            <template v-if="showRecentSetlists">
+              <DropdownMenuLabel>Recent</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  v-for="setlist in setlistStore.recentSetlists"
+                  :key="setlist.id"
+                  @select="() => handleSelectSetlist(setlist.id)"
+                >
+                  {{ setlist.name }}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </template>
+
+            <template v-if="setlistStore.allSetlists.length > 0">
+              <DropdownMenuSeparator v-if="showRecentSetlists" />
+              <DropdownMenuLabel>All Setlists</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  v-for="setlist in setlistStore.allSetlists"
+                  :key="setlist.id"
+                  @select="() => handleSelectSetlist(setlist.id)"
+                >
+                  {{ setlist.name }}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </template>
+          </DropdownMenu>
+        </DropdownMenuPortal>
+      </DropdownMenuRoot>
     </div>
 
     <!-- Action Buttons -->
     <div class="flex items-center gap-2">
       <!-- Save Status -->
-      <div class="flex items-center gap-2 text-sm text-muted-foreground">
-        <Save :size="14" />
-        <span>{{ saveStatus }}</span>
-      </div>
+<!--      <div class="flex items-center gap-2 text-sm text-muted-foreground">-->
+<!--        <Save :size="14" />-->
+<!--        <span>{{ saveStatus }}</span>-->
+<!--      </div>-->
 
       <!-- New Setlist Button -->
       <Button variant="default" size="sm" @click="handleNewSetlist">

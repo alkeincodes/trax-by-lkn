@@ -88,14 +88,14 @@ function formatDuration(seconds: number): string {
 
     <!-- Song Info (Clickable) -->
     <div
-      class="flex-1 cursor-pointer"
+      class="flex items-center justify-between cursor-pointer w-full"
       @click="emit('select', song)"
     >
-      <div class="flex items-baseline gap-2">
-        <span class="font-semibold text-card-foreground">{{ song.name }}</span>
-        <span v-if="song.artist" class="text-sm text-muted-foreground">
+      <div class="">
+        <h5 class="font-semibold text-card-foreground text-sm">{{ song.name }}</h5>
+        <h6 v-if="song.artist" class="text-xs text-muted-foreground">
           by {{ song.artist }}
-        </span>
+        </h6>
       </div>
       <div class="mt-1 flex gap-4 text-xs text-muted-foreground">
         <span v-if="song.key">{{ song.key }}</span>
