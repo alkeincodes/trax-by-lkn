@@ -95,6 +95,11 @@ body {
     z-index: 100;
   }
 
+  .mixer-fader input[type='range'].down-six {
+    width: 490px;
+    top: 230px;
+  }
+
   .mixer-fader input[type='range']::-webkit-slider-runnable-track {
     position: relative;
     width: 80%;

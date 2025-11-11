@@ -52,6 +52,7 @@ const currentLevel = computed(() => props.stem.level || 0)
             type="range"
             min="0"
             max="100"
+            :class="{'down-six': playbackStore.stems.length <= 6}"
             :value="volumePercentage"
             @input="handleVolumeChange"
             aria-label="Volume"
