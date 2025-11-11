@@ -45,7 +45,8 @@ export const usePlaybackStore = defineStore('playback', () => {
   // Actions
   async function selectSong(song: Song) {
     console.log('selectedSong.value: ', selectedSong.value)
-    if (selectedSong.value && currentSong.value?.id === selectedSong.value?.id) return;
+    // Don't reselect if this song is already selected
+    if (selectedSong.value?.id === song.id) return;
     // If a different song is currently playing or loaded, stop it first
     if (currentSong.value && currentSong.value.id !== song.id) {
       if (isPlaying.value) {

@@ -51,7 +51,7 @@ onMounted(() => {
       </div>
 
       <!-- Library View -->
-      <div class="flex-1 overflow-hidden">
+      <div class="flex-1 overflow-hidden max-h-[649px]">
 <!--        <LibraryView />-->
         <StemMixer />
       </div>

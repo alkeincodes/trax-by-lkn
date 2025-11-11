@@ -29,7 +29,7 @@ const handleVolumeChange = async (event: Event) => {
 </script>
 
 <template>
-  <div class="absolute z-[500] right-0 bottom-0 flex h-full min-h-[410px] items-center gap-3 bg-inner-panel p-3">
+  <div class="master-channel absolute z-[500] right-0 bottom-0 flex h-full min-h-[410px] items-center gap-3 bg-inner-panel p-3">
     <!-- Volume Meter -->
     <div class="h-full bg-panel/50">
       <VolumeMeter :level="masterLevel" />
@@ -79,4 +79,11 @@ const handleVolumeChange = async (event: Event) => {
 
 <style scoped>
 /* Remove scoped override - use global .mixer-fader styles from index.css */
+
+.master-channel {
+  .mixer-fader input[type='range'] {
+    width: 530px !important;
+    top: 250px !important;
+  }
+}
 </style>

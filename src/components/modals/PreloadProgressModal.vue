@@ -36,14 +36,18 @@ listen('stem:loading', (event: any) => {
 })
 
 listen('stem:complete', () => {
-  // Keep modal open for a brief moment to show completion
-  setTimeout(() => {
-    isOpen.value = false
-    currentSong.value = ''
-    currentStem.value = ''
-    currentStemIndex.value = 0
-    totalStems.value = 0
-  }, 500)
+  // Only close modal if we're loading a single song (not a setlist)
+  // When preloading a setlist, we wait for 'preload:complete' instead
+  if (totalSongs.value === 0) {
+    // Keep modal open for a brief moment to show completion
+    setTimeout(() => {
+      isOpen.value = false
+      currentSong.value = ''
+      currentStem.value = ''
+      currentStemIndex.value = 0
+      totalStems.value = 0
+    }, 500)
+  }
 })
 
 // Listen for setlist preload events

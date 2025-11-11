@@ -135,23 +135,23 @@ const handleNext = () => {
 
     <!-- Key and Tempo Display -->
     <div
-      v-if="playbackStore.currentSong"
+      v-if="playbackStore.selectedSong"
       class="ml-auto flex items-center gap-4 text-sm"
     >
-      <div v-if="playbackStore.currentSong.key" class="flex items-center gap-1">
+      <div v-if="playbackStore.selectedSong.key" class="flex items-center gap-1">
         <span class="text-muted-foreground">Key:</span>
-        <span class="font-medium">{{ playbackStore.currentSong.key }}</span>
+        <span class="font-medium">{{ playbackStore.selectedSong.key }}</span>
       </div>
-      <div v-if="playbackStore.currentSong.tempo" class="flex items-center gap-1">
+      <div v-if="playbackStore.selectedSong.tempo" class="flex items-center gap-1">
         <span class="text-muted-foreground">Tempo:</span>
-        <span class="font-medium">{{ playbackStore.currentSong.tempo }}</span>
+        <span class="font-medium">{{ playbackStore.selectedSong.tempo }}</span>
       </div>
       <div
-        v-if="playbackStore.currentSong.time_signature"
+        v-if="playbackStore.selectedSong.time_signature"
         class="flex items-center gap-1"
       >
         <span class="text-muted-foreground">Time:</span>
-        <span class="font-medium">{{ playbackStore.currentSong.time_signature }}</span>
+        <span class="font-medium">{{ playbackStore.selectedSong.time_signature }}</span>
       </div>
     </div>
   </div>
