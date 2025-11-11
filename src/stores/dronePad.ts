@@ -288,10 +288,29 @@ export const useDronePadStore = defineStore('dronePad', () => {
   // Set volume
   function setVolume(newVolume: number) {
     volume.value = Math.max(0, Math.min(1, newVolume))
-    if (gainNode.value && isPlaying.value) {
-      const currentTime = audioContext.value!.currentTime
-      gainNode.value.gain.cancelScheduledValues(currentTime)
-      gainNode.value.gain.setValueAtTime(volume.value, currentTime)
+    if (currentGainNode.value && audioContext.value) {
+      const currentTime = audioContext.value.currentTime
+
+      // If fading in, update the target value for the fade
+      if (fadingDirection.value === 'in') {
+        const currentGain = currentGainNode.value.gain.value
+        // Cancel existing automation and restart fade to new target
+        currentGainNode.value.gain.cancelScheduledValues(currentTime)
+        currentGainNode.value.gain.setValueAtTime(currentGain, currentTime)
+
+        // Calculate remaining fade time to new volume
+        const remainingGain = volume.value - currentGain
+        const fadeDuration = 10 // seconds
+        const adjustedDuration = remainingGain > 0 ? (remainingGain / volume.value) * fadeDuration : 0
+
+        if (adjustedDuration > 0) {
+          currentGainNode.value.gain.linearRampToValueAtTime(volume.value, currentTime + adjustedDuration)
+        }
+      } else if (!isFading.value) {
+        // If not fading, set volume immediately
+        currentGainNode.value.gain.cancelScheduledValues(currentTime)
+        currentGainNode.value.gain.setValueAtTime(volume.value, currentTime)
+      }
     }
   }
 

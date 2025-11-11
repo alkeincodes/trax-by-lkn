@@ -41,7 +41,7 @@ onMounted(() => {
     <!-- Main Content -->
     <main class="flex gap-4 flex-1 overflow-hidden p-6">
       <!-- Setlist View -->
-      <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-4 max-h-[649px]">
         <div class="panel p-0">
           <SetlistView />
         </div>
