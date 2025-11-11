@@ -46,12 +46,12 @@ onUnmounted(() => {
   >
     <div
       v-if="open"
-      class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80"
       @click="handleBackdropClick"
     >
       <div
         :class="cn(
-          'relative w-full max-w-lg rounded-lg border border-border bg-card p-6 shadow-lg',
+          'relative w-fit min-w-lg max-w-[90%] rounded-lg border border-border bg-card p-6 shadow-lg',
           props.class
         )"
       >

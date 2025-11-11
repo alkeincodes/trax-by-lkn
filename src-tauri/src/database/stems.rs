@@ -49,7 +49,7 @@ pub fn get_stem(conn: &Connection, id: &str) -> Result<Stem> {
 pub fn get_stems_for_song(conn: &Connection, song_id: &str) -> Result<Vec<Stem>> {
   let mut stmt = conn.prepare(
     "SELECT id, song_id, name, file_path, file_size, sample_rate, channels, duration, volume, is_muted
-     FROM stems WHERE song_id = ?1"
+     FROM stems WHERE song_id = ?1 ORDER BY name COLLATE NOCASE ASC"
   )?;
 
   let stems = stmt.query_map([song_id], |row| {

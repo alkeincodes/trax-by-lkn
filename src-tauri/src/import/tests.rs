@@ -453,6 +453,138 @@ fn test_process_files_with_errors() {
 }
 
 // ========================================
+// STEM NAME DEDUPLICATION TESTS
+// ========================================
+
+#[test]
+fn test_deduplicate_stem_names() {
+  let test_dir = create_test_directory();
+  let db = crate::database::Database::new_in_memory().unwrap();
+
+  // Create files with names that should result in duplicate stem names
+  let files = vec![
+    create_minimal_wav_file(&test_dir, "Song - Bass.wav"),
+    create_minimal_wav_file(&test_dir, "Song - Bass 01.wav"),
+    create_minimal_wav_file(&test_dir, "Song - Vocals.wav"),
+  ];
+
+  let request = ImportRequest {
+    file_paths: files,
+    title: "Test Song".to_string(),
+    artist: None,
+    key: None,
+    time_signature: None,
+  };
+
+  let result = import_song(&db, request);
+  assert!(result.is_ok(), "Should successfully import song with duplicate stem names");
+
+  let song_id = result.unwrap();
+  let stems = db.get_stems_for_song(&song_id).unwrap();
+
+  assert_eq!(stems.len(), 3);
+
+  // Collect stem names
+  let stem_names: Vec<String> = stems.iter().map(|s| s.name.clone()).collect();
+
+  // Check that we have Bass 1, Bass 2, and Vocals (no duplicate)
+  assert!(stem_names.contains(&"Bass 1".to_string()), "Should have 'Bass 1'");
+  assert!(stem_names.contains(&"Bass 2".to_string()), "Should have 'Bass 2'");
+  assert!(stem_names.contains(&"Vocals".to_string()), "Should have 'Vocals'");
+
+  // Ensure no plain "Bass" exists
+  assert!(!stem_names.contains(&"Bass".to_string()), "Should not have plain 'Bass'");
+
+  cleanup_test_directory(&test_dir);
+}
+
+#[test]
+fn test_deduplicate_multiple_stem_types() {
+  let test_dir = create_test_directory();
+  let db = crate::database::Database::new_in_memory().unwrap();
+
+  // Create files with multiple duplicates of different types
+  let files = vec![
+    create_minimal_wav_file(&test_dir, "Song - Bass 1.wav"),
+    create_minimal_wav_file(&test_dir, "Song - Bass 2.wav"),
+    create_minimal_wav_file(&test_dir, "Song - Bass 3.wav"),
+    create_minimal_wav_file(&test_dir, "Song - Guitar.wav"),
+    create_minimal_wav_file(&test_dir, "Song - Guitar Lead.wav"),
+    create_minimal_wav_file(&test_dir, "Song - Vocals.wav"),
+  ];
+
+  let request = ImportRequest {
+    file_paths: files,
+    title: "Multi-Stem Song".to_string(),
+    artist: None,
+    key: None,
+    time_signature: None,
+  };
+
+  let result = import_song(&db, request);
+  assert!(result.is_ok(), "Should successfully import song with multiple duplicate stem types");
+
+  let song_id = result.unwrap();
+  let stems = db.get_stems_for_song(&song_id).unwrap();
+
+  assert_eq!(stems.len(), 6);
+
+  let stem_names: Vec<String> = stems.iter().map(|s| s.name.clone()).collect();
+
+  // Check Bass stems are numbered
+  assert!(stem_names.contains(&"Bass 1".to_string()));
+  assert!(stem_names.contains(&"Bass 2".to_string()));
+  assert!(stem_names.contains(&"Bass 3".to_string()));
+
+  // Check Guitar stems are numbered
+  assert!(stem_names.contains(&"Guitar 1".to_string()));
+  assert!(stem_names.contains(&"Guitar 2".to_string()));
+
+  // Check Vocals has no number (only one)
+  assert!(stem_names.contains(&"Vocals".to_string()));
+
+  cleanup_test_directory(&test_dir);
+}
+
+#[test]
+fn test_no_deduplication_needed() {
+  let test_dir = create_test_directory();
+  let db = crate::database::Database::new_in_memory().unwrap();
+
+  // Create files with all unique stem names
+  let files = vec![
+    create_minimal_wav_file(&test_dir, "Song - Bass.wav"),
+    create_minimal_wav_file(&test_dir, "Song - Drums.wav"),
+    create_minimal_wav_file(&test_dir, "Song - Vocals.wav"),
+  ];
+
+  let request = ImportRequest {
+    file_paths: files,
+    title: "Unique Stems Song".to_string(),
+    artist: None,
+    key: None,
+    time_signature: None,
+  };
+
+  let result = import_song(&db, request);
+  assert!(result.is_ok(), "Should successfully import song with unique stem names");
+
+  let song_id = result.unwrap();
+  let stems = db.get_stems_for_song(&song_id).unwrap();
+
+  assert_eq!(stems.len(), 3);
+
+  let stem_names: Vec<String> = stems.iter().map(|s| s.name.clone()).collect();
+
+  // Check that no numbers are appended when all names are unique
+  assert!(stem_names.contains(&"Bass".to_string()));
+  assert!(stem_names.contains(&"Drums".to_string()));
+  assert!(stem_names.contains(&"Vocals".to_string()));
+
+  cleanup_test_directory(&test_dir);
+}
+
+// ========================================
 // INTEGRATION TESTS
 // ========================================
 

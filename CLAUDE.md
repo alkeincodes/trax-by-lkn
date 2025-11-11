@@ -272,6 +272,61 @@ Future phases include practice tools, team collaboration, and advanced routing.
 - **`src-tauri/tauri.conf.json`**: Tauri app configuration
 - **`src-tauri/Cargo.toml`**: Rust dependencies
 
+## Data Storage
+
+### Database Location
+
+The application uses SQLite with Write-Ahead Logging (WAL) mode for data persistence. Database files are stored in platform-specific locations:
+
+**macOS:**
+```
+~/Library/Application Support/com.lkn.trax/
+├── trax.db          # Main database file
+├── trax.db-wal      # Write-Ahead Log file
+└── trax.db-shm      # Shared memory file
+```
+
+**Windows:**
+```
+%APPDATA%\lkn\trax\
+├── trax.db
+├── trax.db-wal
+└── trax.db-shm
+```
+
+**Linux:**
+```
+~/.local/share/trax/
+├── trax.db
+├── trax.db-wal
+└── trax.db-shm
+```
+
+### Wiping Data for Development
+
+To reset the application to a clean state during development:
+
+```bash
+# macOS
+rm -rf ~/Library/Application\ Support/com.lkn.trax/
+
+# Windows (PowerShell)
+Remove-Item -Recurse -Force "$env:APPDATA\lkn\trax"
+
+# Linux
+rm -rf ~/.local/share/trax/
+```
+
+The application will automatically recreate the database directory and schema on next launch.
+
+### Database Schema
+
+The database schema is defined in `src-tauri/src/database/schema.rs` and includes:
+- **songs**: Track metadata (title, artist, duration, tempo, key, time signature)
+- **stems**: Individual audio tracks per song (file path, volume, mute state)
+- **setlists**: Performance playlists with song ordering
+- **settings**: Application configuration and preferences
+
 ## Testing Strategy
 
 (To be implemented in Phase 1)

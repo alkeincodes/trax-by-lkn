@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import LibraryView from '@/components/library/LibraryView.vue'
 import SetlistView from '@/components/setlist/SetlistView.vue'
 import ImportProgressModal from '@/components/modals/ImportProgressModal.vue'
+import ImportSongsModal from '@/components/modals/ImportSongsModal.vue'
 import NewSetlistModal from '@/components/modals/NewSetlistModal.vue'
 import AddSongToSetlistModal from '@/components/modals/AddSongToSetlistModal.vue'
 import PreloadProgressModal from '@/components/modals/PreloadProgressModal.vue'
@@ -59,6 +60,7 @@ onMounted(() => {
 
     <!-- Modals -->
     <ImportProgressModal />
+    <ImportSongsModal />
     <NewSetlistModal />
     <AddSongToSetlistModal />
     <PreloadProgressModal />

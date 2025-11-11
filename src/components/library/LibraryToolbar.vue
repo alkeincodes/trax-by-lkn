@@ -76,7 +76,7 @@ function toggleViewMode() {
 </script>
 
 <template>
-  <div class="space-y-4 border-b border-border pb-4">
+  <div class="space-y-4 border-b border-border py-4">
     <!-- Top Row: Search and Import -->
     <div class="flex items-center gap-3">
       <!-- Search Input -->
@@ -85,7 +85,7 @@ function toggleViewMode() {
         <input
           v-model="searchInput"
           type="text"
-          placeholder="Search songs or artists..."
+          placeholder="Search song library..."
           class="w-full rounded-md border border-input bg-background py-2 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
@@ -109,7 +109,7 @@ function toggleViewMode() {
     </div>
 
     <!-- Bottom Row: Filters -->
-    <div class="flex flex-wrap items-center gap-3">
+    <div v-if="false" class="flex flex-wrap items-center gap-3">
       <!-- Tempo Range -->
       <div class="flex items-center gap-2">
         <label class="text-sm text-muted-foreground">Tempo:</label>

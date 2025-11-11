@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { ChevronDown } from 'lucide-vue-next'
 import Modal from '@/components/ui/Modal.vue'
 import Button from '@/components/ui/Button.vue'
+import {
+  DropdownMenuRoot,
+  DropdownMenuTrigger,
+  DropdownMenuPortal,
+  DropdownMenuGroup,
+} from 'radix-vue'
+import DropdownMenu from '@/components/ui/DropdownMenu.vue'
+import DropdownMenuItem from '@/components/ui/DropdownMenuItem.vue'
 import { useModalStore } from '@/stores/modal'
 import { useLibraryStore } from '@/stores/library'
 
@@ -20,8 +29,8 @@ const importing = ref(false)
 const importError = ref<string | null>(null)
 const importSuccess = ref(false)
 
-const keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-const timeSignatures = ['2/4', '3/4', '4/4', '5/4', '6/8', '7/8', '9/8', '12/8']
+const keys = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
+const timeSignatures = ['3/4', '4/4', '5/4', '6/8']
 
 async function handleImport() {
   if (!title.value.trim()) {
@@ -132,17 +141,34 @@ function handleClose() {
           <label for="key" class="mb-1 block text-sm font-medium text-foreground">
             Key
           </label>
-          <select
-            id="key"
-            v-model="key"
-            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            :disabled="importing"
-          >
-            <option value="">Select key</option>
-            <option v-for="k in keys" :key="k" :value="k">
-              {{ k }}
-            </option>
-          </select>
+          <DropdownMenuRoot>
+            <DropdownMenuTrigger as-child>
+              <button
+                class="w-full flex items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="importing"
+              >
+                <span>{{ key || 'Select key' }}</span>
+                <ChevronDown :size="16" class="text-muted-foreground ml-2" />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuPortal>
+              <DropdownMenu :side-offset="4" align="start" class="w-[var(--radix-dropdown-menu-trigger-width)]">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem @select="() => key = ''">
+                    Select key
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                      v-for="k in keys"
+                      :key="k"
+                      @select="() => key = k"
+                  >
+                    {{ k }}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenu>
+            </DropdownMenuPortal>
+          </DropdownMenuRoot>
         </div>
 
         <!-- Time Signature (Optional) -->
@@ -150,16 +176,31 @@ function handleClose() {
           <label for="time-signature" class="mb-1 block text-sm font-medium text-foreground">
             Time Signature
           </label>
-          <select
-            id="time-signature"
-            v-model="timeSignature"
-            class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-            :disabled="importing"
-          >
-            <option v-for="sig in timeSignatures" :key="sig" :value="sig">
-              {{ sig }}
-            </option>
-          </select>
+          <DropdownMenuRoot>
+            <DropdownMenuTrigger as-child>
+              <button
+                class="w-full flex items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="importing"
+              >
+                <span>{{ timeSignature }}</span>
+                <ChevronDown :size="16" class="text-muted-foreground ml-2" />
+              </button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuPortal>
+              <DropdownMenu :side-offset="4" align="start" class="w-[var(--radix-dropdown-menu-trigger-width)]">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    v-for="sig in timeSignatures"
+                    :key="sig"
+                    @select="() => timeSignature = sig"
+                  >
+                    {{ sig }}
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenu>
+            </DropdownMenuPortal>
+          </DropdownMenuRoot>
         </div>
       </div>
     </div>

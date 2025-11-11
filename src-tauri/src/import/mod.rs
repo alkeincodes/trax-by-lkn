@@ -179,6 +179,37 @@ pub fn process_files_concurrently(file_paths: &[PathBuf]) -> Vec<Result<Processe
 }
 
 // ========================================
+// STEM NAME DEDUPLICATION
+// ========================================
+
+/// Deduplicate stem names by appending numbers to duplicates
+fn deduplicate_stem_names(processed_files: &mut [ProcessedFile]) {
+  use std::collections::HashMap;
+
+  // Track how many times we've seen each stem name
+  let mut name_counts: HashMap<String, usize> = HashMap::new();
+
+  // First pass: count occurrences of each stem name
+  for file in processed_files.iter() {
+    *name_counts.entry(file.stem_name.clone()).or_insert(0) += 1;
+  }
+
+  // Second pass: append numbers to duplicates
+  let mut current_counts: HashMap<String, usize> = HashMap::new();
+
+  for file in processed_files.iter_mut() {
+    let count = name_counts.get(&file.stem_name).unwrap_or(&0);
+
+    // Only add numbers if there are multiple stems with the same name
+    if *count > 1 {
+      let current_number = current_counts.entry(file.stem_name.clone()).or_insert(0);
+      *current_number += 1;
+      file.stem_name = format!("{} {}", file.stem_name, current_number);
+    }
+  }
+}
+
+// ========================================
 // MAIN IMPORT FUNCTION
 // ========================================
 
@@ -210,6 +241,9 @@ pub fn import_song(db: &Database, request: ImportRequest) -> Result<String, Impo
       "No valid audio files could be processed".to_string()
     ));
   }
+
+  // Deduplicate stem names
+  deduplicate_stem_names(&mut processed_files);
 
   // Check for duplicates (we'll implement a simple in-memory check for now)
   // In production, this would check against existing files in database

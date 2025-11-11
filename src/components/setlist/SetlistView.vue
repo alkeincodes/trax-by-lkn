@@ -83,7 +83,7 @@ function handleNewSetlist() {
 <template>
   <div class="flex h-full flex-col min-w-[500px]">
     <!-- Toolbar -->
-    <SetlistToolbar />
+    <SetlistToolbar v-if="setlistStore.allSetlists.length > 0" />
 
     <!-- Setlist Content -->
     <div class="flex-1 overflow-y-auto p-4">

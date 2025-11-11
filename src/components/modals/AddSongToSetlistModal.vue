@@ -52,6 +52,10 @@ function handleClose() {
   searchQuery.value = ''
   modalStore.closeModal()
 }
+
+function handleImportSongs() {
+  modalStore.openModal('import-songs')
+}
 </script>
 
 <template>
@@ -132,7 +136,10 @@ function handleClose() {
       </div>
 
       <!-- Footer -->
-      <div class="mt-4 flex justify-end">
+      <div class="mt-4 flex justify-between">
+        <Button variant="outline" @click="handleImportSongs">
+          Import Songs
+        </Button>
         <Button variant="secondary" @click="handleClose">
           Done
         </Button>

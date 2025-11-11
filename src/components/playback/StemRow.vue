@@ -42,7 +42,7 @@ const currentLevel = computed(() => props.stem.level || 0)
 
     <!-- Stem Name -->
     <div class="h-full text-center flex flex-col justify-center">
-      <div class="truncate text-sm font-medium mb-4">
+      <div class="truncate text-sm font-medium mb-4 h-[25px]">
         {{ stem.name }}
       </div>
 

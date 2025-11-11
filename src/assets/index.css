@@ -75,7 +75,7 @@ body {
     align-items: center;
     height: 100%;
     width: 95px;
-    background-image: url('/public/slider-track.png');
+    background-image: url('/images/slider-track.png');
     background-size: cover;
     background-position: center;
   }

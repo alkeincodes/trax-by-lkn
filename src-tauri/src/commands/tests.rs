@@ -17,6 +17,7 @@ fn create_test_song(db: &Database, name: &str) -> Song {
     tempo: Some(120.0),
     key: Some("C".to_string()),
     time_signature: Some("4/4".to_string()),
+    mixdown_path: None,
     created_at: chrono::Utc::now().timestamp(),
     updated_at: chrono::Utc::now().timestamp(),
   };
