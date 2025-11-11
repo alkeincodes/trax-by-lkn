@@ -73,9 +73,9 @@ const handleNext = () => {
     <div class="flex items-stretch gap-2">
       <div class="panel text-5xl">C</div>
       <div class="panel text-2xl text-center flex flex-col justify-center gap-[10px]">
-        <h6>74</h6>
+        <h6>{{ playbackStore.selectedSong?.tempo ?? 120 }}</h6>
         <div class="divider border-t border-white/20 w-full"></div>
-        <h6>6/8</h6>
+        <h6>{{ playbackStore.selectedSong?.time_signature ?? '4/4' }}</h6>
       </div>
       <div class="panel text-2xl text-center">
         <span class="text-white">{{ playbackStore.formattedPosition }} / {{ playbackStore.formattedDuration }}</span>
@@ -131,28 +131,6 @@ const handleNext = () => {
           <path d="M20.2402 18.9303C19.8302 18.9303 19.4902 18.5903 19.4902 18.1803V5.82031C19.4902 5.41031 19.8302 5.07031 20.2402 5.07031C20.6502 5.07031 20.9902 5.41031 20.9902 5.82031V18.1803C20.9902 18.5903 20.6602 18.9303 20.2402 18.9303Z" fill="currentColor"/>
         </svg>
       </button>
-    </div>
-
-    <!-- Key and Tempo Display -->
-    <div
-      v-if="playbackStore.selectedSong"
-      class="ml-auto flex items-center gap-4 text-sm"
-    >
-      <div v-if="playbackStore.selectedSong.key" class="flex items-center gap-1">
-        <span class="text-muted-foreground">Key:</span>
-        <span class="font-medium">{{ playbackStore.selectedSong.key }}</span>
-      </div>
-      <div v-if="playbackStore.selectedSong.tempo" class="flex items-center gap-1">
-        <span class="text-muted-foreground">Tempo:</span>
-        <span class="font-medium">{{ playbackStore.selectedSong.tempo }}</span>
-      </div>
-      <div
-        v-if="playbackStore.selectedSong.time_signature"
-        class="flex items-center gap-1"
-      >
-        <span class="text-muted-foreground">Time:</span>
-        <span class="font-medium">{{ playbackStore.selectedSong.time_signature }}</span>
-      </div>
     </div>
   </div>
 </template>

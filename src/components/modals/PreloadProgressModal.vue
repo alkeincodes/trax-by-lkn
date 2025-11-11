@@ -131,13 +131,6 @@ listen('preload:complete', () => {
             </div>
           </div>
         </div>
-
-        <!-- Info -->
-        <p class="mt-4 text-xs text-muted-foreground">
-          {{ totalSongs > 0
-            ? 'Please wait while we prepare your setlist for instant playback'
-            : 'Preparing audio for playback...' }}
-        </p>
       </div>
     </div>
   </Modal>

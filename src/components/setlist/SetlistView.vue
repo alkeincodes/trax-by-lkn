@@ -123,17 +123,6 @@ function handleNewSetlist() {
 
         <!-- Song List -->
         <div v-else>
-          <!-- Add Song Button -->
-          <div class="mb-3 flex justify-end">
-            <Button
-              variant="secondary"
-              size="sm"
-              @click="modalStore.openModal('add-song-to-setlist')"
-            >
-              <Plus :size="16" />
-            </Button>
-          </div>
-
           <!-- Songs -->
           <div class="space-y-2">
             <SetlistItem

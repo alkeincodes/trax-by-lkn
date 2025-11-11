@@ -10,7 +10,7 @@ const playbackStore = usePlaybackStore()
   <div class="h-full rounded-lg panel overflow-y-auto relative pr-[100px]">
     <!-- Master Channel (always visible when there are stems) -->
     <MasterChannel v-if="playbackStore.stems.length > 0" />
-    <div class="flex flex-wrap gap-4 rounded-lg h-full relative overflow-x-auto">
+    <div class="flex flex-wrap gap-4 rounded-lg h-full relative overflow-x-auto w-full">
 
       <!-- Stem List -->
       <template
