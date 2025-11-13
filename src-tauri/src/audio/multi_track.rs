@@ -192,9 +192,17 @@ impl MultiTrackEngine {
       );
     }
 
+    // Get the device's default configuration to use its preferred sample rate
+    let default_config = device
+      .default_output_config()
+      .map_err(|e| AudioError::DeviceInit(format!("Failed to get default config: {}", e)))?;
+
+    let device_sample_rate = default_config.sample_rate().0;
+    log::info!("Device default sample rate: {}Hz", device_sample_rate);
+
     let config = StreamConfig {
       channels: 2,
-      sample_rate: SampleRate(TARGET_SAMPLE_RATE),
+      sample_rate: SampleRate(device_sample_rate),
       buffer_size: cpal::BufferSize::Fixed(BUFFER_SIZE as u32),
     };
 
@@ -233,6 +241,7 @@ impl MultiTrackEngine {
     log::info!("Stream is now playing");
 
     self.stream = Some(stream);
+    self.device_sample_rate = device_sample_rate;
 
     Ok(())
   }
