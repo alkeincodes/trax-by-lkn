@@ -1,0 +1,1592 @@
+> trax@0.1.0 tauri
+> tauri build
+
+        Info Looking up installed tauri packages to check mismatched versions...
+     Running beforeBuildCommand `npm run build`
+
+> trax@0.1.0 build
+> vue-tsc --noEmit && vite build
+
+vite v6.4.1 building for production...
+✓ 1773 modules transformed.
+dist/index.html                   0.49 kB │ gzip:  0.32 kB
+dist/assets/index-td2Z7TDs.css   39.42 kB │ gzip:  7.42 kB
+dist/assets/index-C14chQW7.js   283.69 kB │ gzip: 93.34 kB
+✓ built in 3.47s
+   Compiling trax v0.1.0 (C:\Users\LKN\Documents\Developments\trax-by-lkn\src-tauri)
+error[E0432]: unresolved import `rusqlite`                                                                                                                                                                                       
+ --> src\database\connection.rs:1:5
+  |
+1 | use rusqlite::{Connection, Result};
+  |     ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+  |
+  = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `rusqlite`
+ --> src\database\schema.rs:1:5
+  |
+1 | use rusqlite::{Connection, Result};
+  |     ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+  |
+  = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `rusqlite`
+ --> src\database\songs.rs:1:5
+  |
+1 | use rusqlite::{Connection, Result, params};
+  |     ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+  |
+  = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `rusqlite`
+ --> src\database\stems.rs:1:5
+  |
+1 | use rusqlite::{Connection, Result, params};
+  |     ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+  |
+  = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `rusqlite`
+ --> src\database\setlists.rs:1:5
+  |
+1 | use rusqlite::{Connection, Result, params};
+  |     ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+  |
+  = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `rusqlite`
+ --> src\database\settings.rs:1:5
+  |
+1 | use rusqlite::{Connection, Result, params};
+  |     ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+  |
+  = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rayon`
+  --> src\import\mixdown.rs:10:5
+   |
+10 | use rayon::prelude::*;
+   |     ^^^^^ use of unresolved module or unlinked crate `rayon`
+   |
+   = help: if you wanted to use a crate named `rayon`, use `cargo add rayon` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `sha2`
+ --> src\import\duplicate.rs:1:5
+  |
+1 | use sha2::{Sha256, Digest};
+  |     ^^^^ use of unresolved module or unlinked crate `sha2`
+  |
+  = help: if you wanted to use a crate named `sha2`, use `cargo add sha2` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rayon`
+  --> src\import\mod.rs:10:5
+   |
+10 | use rayon::prelude::*;
+   |     ^^^^^ use of unresolved module or unlinked crate `rayon`
+   |
+   = help: if you wanted to use a crate named `rayon`, use `cargo add rayon` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `rusqlite`
+  --> src\database\mod.rs:12:5
+   |
+12 | use rusqlite::{Connection, Result};
+   |     ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+   |
+   = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0432]: unresolved import `hound`
+ --> src\import\mixdown.rs:9:5
+  |
+9 | use hound::{WavWriter, WavSpec};
+  |     ^^^^^ use of unresolved module or unlinked crate `hound`
+  |
+  = help: if you wanted to use a crate named `hound`, use `cargo add hound` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\audio\engine.rs:95:24
+   |
+95 |     let err_fn = |err| log::error!("Audio stream error: {}", err);
+   |                        ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\lib.rs:39:5
+   |
+39 |     log::info!("Audio engine initialized successfully");
+   |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\lib.rs:32:5
+   |
+32 |     log::info!("Database initialized successfully");
+   |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\lib.rs:26:5
+   |
+26 |     log::info!("Initializing TraX application...");
+   |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\events.rs:61:9
+   |
+61 |         log::error!("Failed to emit levels event: {}", e);
+   |         ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\events.rs:53:9
+   |
+53 |         log::error!("Failed to emit state event: {}", e);
+   |         ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\events.rs:46:9
+   |
+46 |         log::error!("Failed to emit position event: {}", e);
+   |         ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\mod.rs:149:5
+    |
+149 |     log::info!("Cache: Max size updated to {:.1} GB", new_max_bytes as f64 / 1_073_741_824.0);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\mod.rs:137:7
+    |
+137 |       log::info!("Cache: Evicting LRU song {}", lru_id);
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\mod.rs:127:5
+    |
+127 |     log::info!("Cache: Cleared all songs");
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\mod.rs:120:7
+    |
+120 |       log::info!("Cache: Removed song {} ({:.1} MB)", song_id, entry.size_bytes as f64 / 1_048_576.0);
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\mod.rs:105:5
+    |
+105 |     log::info!(
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:287:3
+    |
+287 |   log::info!("Audio output device switched to: {}", device_name);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:262:3
+    |
+262 |   log::info!("Sample rate set to: {}", sample_rate);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:243:3
+    |
+243 |   log::info!("Audio buffer size set to: {}", buffer_size);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:224:3
+    |
+224 |   log::info!("Audio output device set to: {}", device_name);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:197:3
+    |
+197 |   log::info!("Total devices found: {}", audio_devices.len());
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:192:9
+    |
+192 |         log::warn!("Failed to get name for audio device");
+    |         ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:185:11
+    |
+185 |           log::info!("Found additional audio device: {}", name);
+    |           ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:171:5
+    |
+171 |     log::info!("Adding default device: {}", name);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:164:3
+    |
+164 |   log::info!("Default device: {:?}", default_device_name);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\settings.rs:158:3
+    |
+158 |   log::info!("Enumerating audio output devices...");
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\cache.rs:29:3
+   |
+29 |   log::info!("Clearing cache");
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\cache.rs:16:3
+   |
+16 |   log::info!("Setting cache size to {} bytes ({:.1} GB)", size_bytes, size_bytes as f64 / 1_073_741_824.0);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\setlists.rs:171:3
+    |
+171 |   log::info!("Reordering songs in setlist {}", setlist_id);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\setlists.rs:146:3
+    |
+146 |   log::info!("Removing song {} from setlist {}", song_id, setlist_id);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\setlists.rs:119:3
+    |
+119 |   log::info!("Adding song {} to setlist {}", song_id, setlist_id);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\setlists.rs:103:3
+    |
+103 |   log::debug!("Getting all setlists");
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\setlists.rs:89:3
+   |
+89 |   log::info!("Deleting setlist: {}", setlist_id);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\setlists.rs:56:3
+   |
+56 |   log::info!("Updating setlist: {}", setlist_id);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\setlists.rs:39:3
+   |
+39 |   log::debug!("Getting setlist: {}", setlist_id);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\setlists.rs:28:3
+   |
+28 |   log::info!("Created setlist with ID: {}", setlist_id);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\setlists.rs:11:3
+   |
+11 |   log::info!("Creating new setlist: {}", name);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\library.rs:201:3
+    |
+201 |   log::debug!("Getting stems for song: {}", song_id);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\library.rs:174:3
+    |
+174 |   log::info!("Deleting song: {}", song_id);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\library.rs:159:3
+    |
+159 |   log::debug!("Getting song: {}", song_id);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\library.rs:126:3
+    |
+126 |   log::debug!("Filtering songs with criteria");
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\library.rs:99:3
+   |
+99 |   log::debug!("Searching songs with query: {}", query);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\library.rs:84:3
+   |
+84 |   log::debug!("Getting all songs");
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\library.rs:72:5
+   |
+72 |     log::info!("✅ Song cached in memory - ready for instant playback!");
+   |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\library.rs:46:5
+   |
+46 |     log::info!("Populating cache with {} decoded stems...", import_result.decoded_stems.len());
+   |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\library.rs:37:3
+   |
+37 |   log::info!("Successfully imported song with ID: {}", import_result.song_id);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\library.rs:19:3
+   |
+19 |   log::info!("Importing {} files for song '{}'", file_paths.len(), title);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\stems.rs:123:3
+    |
+123 |   log::debug!("Setting master volume to {}", volume);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\stems.rs:92:3
+   |
+92 |   log::debug!("Toggling solo for stem {}", stem_id);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\stems.rs:52:3
+   |
+52 |   log::debug!("Toggling mute for stem {}", stem_id);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\stems.rs:11:3
+   |
+11 |   log::debug!("Setting stem {} volume to {}", stem_id, volume);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:408:3
+    |
+408 |   log::info!("Finished preloading setlist '{}'", setlist.name);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:400:7
+    |
+400 |       log::warn!("Failed to preload song '{}': {}", song.name, e);
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:396:5
+    |
+396 |     log::info!("Preloading song {}/{}: {}", current, total, song.name);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:384:3
+    |
+384 |   log::info!("Found {} songs in setlist '{}'", total, setlist.name);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:372:3
+    |
+372 |   log::info!("Starting to preload setlist: {}", setlist_id);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:364:3
+    |
+364 |   log::info!("Finished smart preload for setlist '{}'", setlist.name);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:356:7
+    |
+356 |       log::warn!("Failed to preload song '{}': {}", song_name, e);
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:336:5
+    |
+336 |     log::info!(
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:298:3
+    |
+298 |   log::info!("Found {} songs in setlist '{}'", total, setlist.name);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:282:3
+    |
+282 |   log::info!("Starting smart preload for setlist: {} (current index: {:?})", setlist_id, current_song_index);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:250:3
+    |
+250 |   log::info!("Seeking to position: {}", position);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:234:3
+    |
+234 |   log::info!("Stopping playback");
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:218:3
+    |
+218 |   log::info!("Pausing playback");
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:202:3
+    |
+202 |   log::info!("Resuming playback");
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:194:3
+    |
+194 |   log::info!("Successfully started playback from cache");
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:149:3
+    |
+149 |   log::info!("Playing song: {}", song_id);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:138:3
+    |
+138 |   log::info!("Successfully loaded song '{}' into memory", song.name);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:129:3
+    |
+129 |   log::info!("✅ All {} stems decoded successfully in parallel!", cached_stems.len());
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\commands\playback.rs:110:3
+    |
+110 |   log::info!("⏳ Waiting for {} parallel decode tasks to complete...", decode_tasks.len());
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\playback.rs:95:7
+   |
+95 |       log::info!("✅ PARALLEL: Completed decode for stem {}/{}: {} at {}Hz", current_stem, total_stems, stem_name, final_sample_rate);
+   |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\playback.rs:83:9
+   |
+83 |         log::info!("Resampling {} from {}Hz to {}Hz", stem_name, metadata.sample_rate, device_sample_rate);
+   |         ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\playback.rs:59:7
+   |
+59 |       log::info!("⚙️  PARALLEL: Starting decode for stem {}/{}: {}", current_stem, total_stems, stem_name);
+   |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\playback.rs:41:3
+   |
+41 |   log::info!("Using device sample rate: {}Hz for all stems", device_sample_rate);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\playback.rs:34:3
+   |
+34 |   log::info!("Loading {} stems in PARALLEL...", total_stems);
+   |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\commands\playback.rs:14:7
+   |
+14 |       log::info!("Song {} already in memory, skipping load", song_id);
+   |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+ --> src\commands\playback.rs:8:3
+  |
+8 |   log::info!("Loading song stems: {}", song_id);
+  |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mod.rs:360:3
+    |
+360 |   log::info!(
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mod.rs:355:9
+    |
+355 |         log::error!("Failed to update song with mixdown path: {}", e);
+    |         ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mod.rs:343:7
+    |
+343 |       log::error!("Failed to generate mixdown: {}. Song will be imported without mixdown.", e);
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mod.rs:339:7
+    |
+339 |       log::info!("Mixdown generated successfully: {}", path);
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mod.rs:336:3
+    |
+336 |   log::info!("Generating mixdown for song '{}'...", request.title);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mod.rs:330:9
+    |
+330 |         log::error!("Failed to create stem, song may be incomplete: {}", e);
+    |         ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mod.rs:242:9
+    |
+242 |         log::warn!("Failed to process file: {}", e);
+    |         ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `thiserror`
+  --> src\import\mod.rs:25:17
+   |
+25 | #[derive(Debug, thiserror::Error)]
+   |                 ^^^^^^^^^ use of unresolved module or unlinked crate `thiserror`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:314:3
+    |
+314 |   log::info!("All stems ready for cache");
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:298:3
+    |
+298 |   log::info!("Preparing {} decoded stems for cache at {}Hz...", decoded_stems.len(), target_sample_rate);
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:295:3
+    |
+295 |   log::info!("Mixdown generated successfully: {}", mixdown_path.display());
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:263:5
+    |
+263 |     log::info!("Normalized mixdown by factor of {}", scale);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:234:3
+    |
+234 |   log::info!("All {} stems decoded successfully", decoded_stems.len());
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:221:7
+    |
+221 |       log::warn!(
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:204:7
+    |
+204 |       log::info!("Decoding stem: {}", file_path.display());
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:199:3
+    |
+199 |   log::info!("Decoding {} stems in parallel...", stem_file_paths.len());
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:194:5
+    |
+194 |     log::info!("Single stem - copied to mixdown: {}", mixdown_path.display());
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:176:5
+    |
+176 |     log::info!("Decoding single stem for cache...");
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:167:3
+    |
+167 |   log::info!("Generating mixdown for song {} from {} stems", song_id, stem_file_paths.len());
+    |   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\import\mixdown.rs:143:9
+    |
+143 |         log::warn!("Decode error: {}", e);
+    |         ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `thiserror`
+   --> src\database\mod.rs:182:17
+    |
+182 | #[derive(Debug, thiserror::Error)]
+    |                 ^^^^^^^^^ use of unresolved module or unlinked crate `thiserror`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\database\mod.rs:159:19
+    |
+159 |         Err(e) => log::warn!("Failed to get song {} in setlist {}: {}", song_id, setlist_id, e),
+    |                   ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\decoder.rs:148:5
+    |
+148 |     log::info!("Decoded {} samples total", all_samples.len());
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\decoder.rs:124:11
+    |
+124 |           log::warn!("Decode error: {}, skipping packet", e);
+    |           ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:755:5
+    |
+755 |     log::info!("Successfully switched to device: {}", device_name);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:752:7
+    |
+752 |       log::info!("Resumed playback");
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:746:5
+    |
+746 |     log::info!("Restored position to: {}", current_position);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:738:7
+    |
+738 |       log::info!("Found device for stream: {:?}", device.name());
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:715:7
+    |
+715 |       log::info!("Dropping old stream");
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:702:5
+    |
+702 |     log::info!("Current state: playing={}, position={}", was_playing, current_position);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:693:5
+    |
+693 |     log::info!("Switching audio device to: {}", device_name);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:643:5
+    |
+643 |     log::info!("Seeked to position: {} seconds ({} samples)", position_seconds, sample_position);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:513:5
+    |
+513 |     log::info!("Successfully loaded stem from samples at index {} (zero-copy)", stem_id);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:478:7
+    |
+478 |       log::info!("Resampling from {}Hz to {}Hz", metadata.sample_rate, self.device_sample_rate);
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:473:5
+    |
+473 |     log::info!("Decoding entire audio file...");
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:468:5
+    |
+468 |     log::info!("Loading stem from: {}", path);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:233:5
+    |
+233 |     log::info!("Stream is now playing");
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:227:5
+    |
+227 |     log::info!("Stream built successfully, starting playback...");
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:214:24
+    |
+214 |     let err_fn = |err| log::error!("Audio stream error: {}", err);
+    |                        ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:201:5
+    |
+201 |     log::info!("Building stream with config: channels={}, sample_rate={}, buffer_size={}",
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:188:7
+    |
+188 |       log::info!("  Config #{}: channels={}, sample_rate={:?}",
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:186:5
+    |
+186 |     log::info!("Device supported output configs:");
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:179:5
+    |
+179 |     log::info!("Initializing stream for device: {:?}", device.name());
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:173:5
+    |
+173 |     log::info!("Multi-track engine initialized successfully");
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:168:7
+    |
+168 |       log::info!("Using audio device: {:?}", device.name());
+    |       ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\multi_track.rs:117:5
+    |
+117 |     log::info!("Initializing multi-track engine with {} stems...", max_stems);
+    |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `thiserror`
+  --> src\audio\types.rs:29:17
+   |
+29 | #[derive(Debug, thiserror::Error)]
+   |                 ^^^^^^^^^ use of unresolved module or unlinked crate `thiserror`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\engine.rs:158:13
+    |
+158 |             log::error!("Decode error: {}", e);
+    |             ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\engine.rs:140:17
+    |
+140 |                 log::error!("Failed to seek: {}", e);
+    |                 ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+   --> src\audio\engine.rs:129:17
+    |
+129 |                 log::error!("Failed to play file: {}", e);
+    |                 ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\audio\engine.rs:83:5
+   |
+83 |     log::info!("Audio engine initialized successfully");
+   |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\audio\engine.rs:50:5
+   |
+50 |     log::info!("Using audio device: {:?}", device.name());
+   |     ^^^ use of unresolved module or unlinked crate `log`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`
+  --> src\audio\engine.rs:44:5
+   |
+44 |     log::info!("Initializing audio engine...");
+   |     ^^^ use of unresolved module or unlinked crate `log`
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\import\mod.rs:27:5
+   |
+27 |   #[error("File not found: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\import\mod.rs:30:5
+   |
+30 |   #[error("Invalid format: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\import\mod.rs:33:5
+   |
+33 |   #[error("Metadata extraction failed: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\import\mod.rs:36:5
+   |
+36 |   #[error("Database error: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\import\mod.rs:39:5
+   |
+39 |   #[error("Validation error: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\import\mod.rs:42:5
+   |
+42 |   #[error("Duplicate file detected: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\import\mod.rs:45:5
+   |
+45 |   #[error("IO error: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `from` in this scope                                                                                                                                                                                
+  --> src\import\mod.rs:46:8
+   |
+46 |   Io(#[from] std::io::Error),
+   |        ^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+   --> src\database\mod.rs:184:5
+    |
+184 |   #[error("Database error: {0}")]
+    |     ^^^^^
+
+error: cannot find attribute `from` in this scope                                                                                                                                                                                
+   --> src\database\mod.rs:185:14
+    |
+185 |   Rusqlite(#[from] rusqlite::Error),
+    |              ^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+   --> src\database\mod.rs:187:5
+    |
+187 |   #[error("Serialization error: {0}")]
+    |     ^^^^^
+
+error: cannot find attribute `from` in this scope                                                                                                                                                                                
+   --> src\database\mod.rs:188:19
+    |
+188 |   Serialization(#[from] serde_json::Error),
+    |                   ^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+   --> src\database\mod.rs:190:5
+    |
+190 |   #[error("Item not found: {0}")]
+    |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\audio\types.rs:31:5
+   |
+31 |   #[error("Failed to initialize audio device: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\audio\types.rs:34:5
+   |
+34 |   #[error("Failed to decode audio file: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\audio\types.rs:37:5
+   |
+37 |   #[error("Failed to open audio file: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\audio\types.rs:40:5
+   |
+40 |   #[error("Audio playback error: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\audio\types.rs:43:5
+   |
+43 |   #[error("Invalid audio format: {0}")]
+   |     ^^^^^
+
+error: cannot find attribute `error` in this scope                                                                                                                                                                               
+  --> src\audio\types.rs:46:5
+   |
+46 |   #[error("Audio stream error: {0}")]
+   |     ^^^^^
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`                                                                                                                                             
+  --> src\database\schema.rs:58:15
+   |
+58 |     [version, chrono::Utc::now().timestamp() as i32],
+   |               ^^^^^^ use of unresolved module or unlinked crate `chrono`
+   |
+   = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`                                                                                                                                             
+  --> src\database\songs.rs:50:20
+   |
+50 |   let updated_at = chrono::Utc::now().timestamp();
+   |                    ^^^^^^ use of unresolved module or unlinked crate `chrono`
+   |
+   = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`                                                                                                                                             
+  --> src\database\setlists.rs:47:20
+   |
+47 |   let updated_at = chrono::Utc::now().timestamp();
+   |                    ^^^^^^ use of unresolved module or unlinked crate `chrono`
+   |
+   = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `uuid`                                                                                                                                               
+   --> src\import\mod.rs:282:17
+    |
+282 |   let song_id = uuid::Uuid::new_v4().to_string();
+    |                 ^^^^ use of unresolved module or unlinked crate `uuid`
+    |
+    = help: if you wanted to use a crate named `uuid`, use `cargo add uuid` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`                                                                                                                                             
+   --> src\import\mod.rs:283:13
+    |
+283 |   let now = chrono::Utc::now().timestamp();
+    |             ^^^^^^ use of unresolved module or unlinked crate `chrono`
+    |
+    = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `uuid`                                                                                                                                               
+   --> src\import\mod.rs:310:19
+    |
+310 |     let stem_id = uuid::Uuid::new_v4().to_string();
+    |                   ^^^^ use of unresolved module or unlinked crate `uuid`
+    |
+    = help: if you wanted to use a crate named `uuid`, use `cargo add uuid` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tokio`                                                                                                                                              
+  --> src\commands\playback.rs:58:16
+   |
+58 |     let task = tokio::task::spawn_blocking(move || {
+   |                ^^^^^ use of unresolved module or unlinked crate `tokio`
+   |
+   = help: if you wanted to use a crate named `tokio`, use `cargo add tokio` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `futures`                                                                                                                                            
+   --> src\commands\playback.rs:111:17
+    |
+111 |   let results = futures::future::join_all(decode_tasks).await;
+    |                 ^^^^^^^ use of unresolved module or unlinked crate `futures`
+    |
+    = help: if you wanted to use a crate named `futures`, use `cargo add futures` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `uuid`                                                                                                                                               
+  --> src\commands\setlists.rs:13:20
+   |
+13 |   let setlist_id = uuid::Uuid::new_v4().to_string();
+   |                    ^^^^ use of unresolved module or unlinked crate `uuid`
+   |
+   = help: if you wanted to use a crate named `uuid`, use `cargo add uuid` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`                                                                                                                                             
+  --> src\commands\setlists.rs:14:13
+   |
+14 |   let now = chrono::Utc::now().timestamp();
+   |             ^^^^^^ use of unresolved module or unlinked crate `chrono`
+   |
+   = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`                                                                                                                                             
+  --> src\commands\setlists.rs:73:24
+   |
+73 |   setlist.updated_at = chrono::Utc::now().timestamp();
+   |                        ^^^^^^ use of unresolved module or unlinked crate `chrono`
+   |
+   = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`                                                                                                                                             
+   --> src\commands\setlists.rs:129:26
+    |
+129 |     setlist.updated_at = chrono::Utc::now().timestamp();
+    |                          ^^^^^^ use of unresolved module or unlinked crate `chrono`
+    |
+    = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`                                                                                                                                             
+   --> src\commands\setlists.rs:155:24
+    |
+155 |   setlist.updated_at = chrono::Utc::now().timestamp();
+    |                        ^^^^^^ use of unresolved module or unlinked crate `chrono`
+    |
+    = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `chrono`                                                                                                                                             
+   --> src\commands\setlists.rs:180:24
+    |
+180 |   setlist.updated_at = chrono::Utc::now().timestamp();
+    |                        ^^^^^^ use of unresolved module or unlinked crate `chrono`
+    |
+    = help: if you wanted to use a crate named `chrono`, use `cargo add chrono` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `tokio`                                                                                                                                              
+  --> src\events.rs:18:7
+   |
+18 |       tokio::time::sleep(Duration::from_millis(50)).await; // 20 FPS for smooth meters
+   |       ^^^^^ use of unresolved module or unlinked crate `tokio`
+   |
+   = help: if you wanted to use a crate named `tokio`, use `cargo add tokio` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `log`                                                                                                                                                
+  --> src\lib.rs:23:23
+   |
+23 |         .filter_level(log::LevelFilter::Info)
+   |                       ^^^ use of unresolved module or unlinked crate `log`
+   |
+   = help: if you wanted to use a crate named `log`, use `cargo add log` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rusqlite`                                                                                                                                           
+  --> src\database\connection.rs:42:20
+   |
+42 |       .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+   |                    ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+   |
+   = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+help: consider importing one of these items
+   |
+1  + use std::error::Error;
+   |
+1  + use std::fmt::Error;
+   |
+1  + use std::io::Error;
+   |
+1  + use core::error::Error;
+   |
+     and 8 other candidates
+help: if you import `Error`, refer to it directly
+   |
+42 -       .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+42 +       .map_err(|e| Error::ToSqlConversionFailure(Box::new(e)))?;
+   |
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rusqlite`
+ --> src\database\setlists.rs:7:18
+  |
+7 |     .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+  |                  ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+  |
+  = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+help: consider importing one of these items
+  |
+1 + use std::error::Error;
+  |
+1 + use std::fmt::Error;
+  |
+1 + use std::io::Error;
+  |
+1 + use core::error::Error;
+  |
+    and 8 other candidates
+help: if you import `Error`, refer to it directly
+  |
+7 -     .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+7 +     .map_err(|e| Error::ToSqlConversionFailure(Box::new(e)))?;
+  |
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rusqlite`                                                                                                                                           
+  --> src\database\setlists.rs:32:22
+   |
+32 |         .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+   |                      ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+   |
+   = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+help: consider importing one of these items
+   |
+1  + use std::error::Error;
+   |
+1  + use std::fmt::Error;
+   |
+1  + use std::io::Error;
+   |
+1  + use core::error::Error;
+   |
+     and 8 other candidates
+help: if you import `Error`, refer to it directly
+   |
+32 -         .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+32 +         .map_err(|e| Error::ToSqlConversionFailure(Box::new(e)))?;
+   |
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rusqlite`                                                                                                                                           
+  --> src\database\setlists.rs:49:18
+   |
+49 |     .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+   |                  ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+   |
+   = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+help: consider importing one of these items
+   |
+1  + use std::error::Error;
+   |
+1  + use std::fmt::Error;
+   |
+1  + use std::io::Error;
+   |
+1  + use core::error::Error;
+   |
+     and 8 other candidates
+help: if you import `Error`, refer to it directly
+   |
+49 -     .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+49 +     .map_err(|e| Error::ToSqlConversionFailure(Box::new(e)))?;
+   |
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rusqlite`                                                                                                                                           
+  --> src\database\setlists.rs:80:20
+   |
+80 |       .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+   |                    ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+   |
+   = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+help: consider importing one of these items
+   |
+1  + use std::error::Error;
+   |
+1  + use std::fmt::Error;
+   |
+1  + use std::io::Error;
+   |
+1  + use core::error::Error;
+   |
+     and 8 other candidates
+help: if you import `Error`, refer to it directly
+   |
+80 -       .map_err(|e| rusqlite::Error::ToSqlConversionFailure(Box::new(e)))?;
+80 +       .map_err(|e| Error::ToSqlConversionFailure(Box::new(e)))?;
+   |
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rusqlite`                                                                                                                                           
+  --> src\database\mod.rs:51:20
+   |
+51 |       .map_err(|_| rusqlite::Error::InvalidQuery)
+   |                    ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+   |
+   = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+help: consider importing one of these items
+   |
+12 + use std::error::Error;
+   |
+12 + use std::fmt::Error;
+   |
+12 + use std::io::Error;
+   |
+12 + use core::error::Error;
+   |
+     and 8 other candidates
+help: if you import `Error`, refer to it directly
+   |
+51 -       .map_err(|_| rusqlite::Error::InvalidQuery)
+51 +       .map_err(|_| Error::InvalidQuery)
+   |
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `hound`                                                                                                                                              
+   --> src\import\mixdown.rs:275:20
+    |
+275 |     sample_format: hound::SampleFormat::Int,
+    |                    ^^^^^ use of unresolved module or unlinked crate `hound`
+    |
+    = help: if you wanted to use a crate named `hound`, use `cargo add hound` to add it to your `Cargo.toml`
+help: consider importing this enum
+    |
+1   + use cpal::SampleFormat;
+    |
+help: if you import `SampleFormat`, refer to it directly
+    |
+275 -     sample_format: hound::SampleFormat::Int,
+275 +     sample_format: SampleFormat::Int,
+    |
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `env_logger`
+  --> src\lib.rs:22:5
+   |
+22 |     env_logger::Builder::from_default_env()
+   |     ^^^^^^^^^^ use of unresolved module or unlinked crate `env_logger`
+   |
+   = help: if you wanted to use a crate named `env_logger`, use `cargo add env_logger` to add it to your `Cargo.toml`
+help: consider importing one of these structs
+   |
+7  + use std::thread::Builder;
+   |
+7  + use tauri::Builder;
+   |
+7  + use tauri::plugin::Builder;
+   |
+7  + use tauri_plugin_opener::Builder;
+   |
+help: if you import `Builder`, refer to it directly
+   |
+22 -     env_logger::Builder::from_default_env()
+22 +     Builder::from_default_env()
+   |
+
+warning: unused import: `engine::AudioEngine`                                                                                                                                                                                    
+  --> src\audio\mod.rs:12:9
+   |
+12 | pub use engine::AudioEngine;
+   |         ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `StemCapacity`
+  --> src\audio\mod.rs:13:41
+   |
+13 | pub use multi_track::{MultiTrackEngine, StemCapacity};
+   |                                         ^^^^^^^^^^^^
+
+warning: unused imports: `AudioCommand` and `AudioMetadata`
+  --> src\audio\mod.rs:14:32
+   |
+14 | pub use types::{PlaybackState, AudioCommand, AudioMetadata};
+   |                                ^^^^^^^^^^^^  ^^^^^^^^^^^^^
+
+warning: unused import: `decoder::AudioDecoder`
+  --> src\audio\mod.rs:15:9
+   |
+15 | pub use decoder::AudioDecoder;
+   |         ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `std::sync::Arc`                                                                                                                                                                                         
+ --> src\lib.rs:7:5
+  |
+7 | use std::sync::Arc;
+  |     ^^^^^^^^^^^^^^
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+  --> src\commands\playback.rs:73:82
+   |
+73 |         .map_err(|e| format!("Failed to create decoder for '{}': {}", stem_name, e))?;
+   |                                                                                  ^ `AudioError` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+  --> src\commands\playback.rs:76:80
+   |
+76 |         .map_err(|e| format!("Failed to get metadata for '{}': {}", stem_name, e))?;
+   |                                                                                ^ `AudioError` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+  --> src\commands\playback.rs:79:70
+   |
+79 |         .map_err(|e| format!("Failed to decode '{}': {}", stem_name, e))?;
+   |                                                                      ^ `AudioError` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+   --> src\commands\playback.rs:179:62
+    |
+179 |       .map_err(|e| format!("Failed to load cached stem: {}", e))?;
+    |                                                              ^ `AudioError` cannot be formatted with the default formatter
+    |
+    = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+   --> src\commands\playback.rs:192:58
+    |
+192 |     .map_err(|e| format!("Failed to start playback: {}", e))?;
+    |                                                          ^ `AudioError` cannot be formatted with the default formatter
+    |
+    = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+   --> src\commands\playback.rs:210:59
+    |
+210 |     .map_err(|e| format!("Failed to resume playback: {}", e))?;
+    |                                                           ^ `AudioError` cannot be formatted with the default formatter
+    |
+    = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+   --> src\commands\playback.rs:226:58
+    |
+226 |     .map_err(|e| format!("Failed to pause playback: {}", e))?;
+    |                                                          ^ `AudioError` cannot be formatted with the default formatter
+    |
+    = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+   --> src\commands\playback.rs:242:57
+    |
+242 |     .map_err(|e| format!("Failed to stop playback: {}", e))?;
+    |                                                         ^ `AudioError` cannot be formatted with the default formatter
+    |
+    = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+   --> src\commands\playback.rs:258:48
+    |
+258 |     .map_err(|e| format!("Failed to seek: {}", e))?;
+    |                                                ^ `AudioError` cannot be formatted with the default formatter
+    |
+    = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unused variable: `state`                                                                                                                                                                                                
+   --> src\commands\stems.rs:141:3
+    |
+141 |   state: State<'_, AppState>
+    |   ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+error[E0277]: `ImportError` doesn't implement `std::fmt::Display`                                                                                                                                                                
+  --> src\commands\library.rs:35:47
+   |
+35 |     .map_err(|e| format!("Import failed: {}", e))?;
+   |                                               ^ `ImportError` cannot be formatted with the default formatter
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `ImportError`
+   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+   = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `dirs`                                                                                                                                               
+  --> src\import\mixdown.rs:29:5
+   |
+29 |     dirs::data_local_dir()
+   |     ^^^^ use of unresolved module or unlinked crate `dirs`
+   |
+   = help: if you wanted to use a crate named `dirs`, use `cargo add dirs` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `dirs`
+  --> src\import\mixdown.rs:37:5
+   |
+37 |     dirs::data_local_dir()
+   |     ^^^^ use of unresolved module or unlinked crate `dirs`
+   |
+   = help: if you wanted to use a crate named `dirs`, use `cargo add dirs` to add it to your `Cargo.toml`
+
+error[E0277]: `?` couldn't convert the error to `ImportError`                                                                                                                                                                    
+  --> src\import\mixdown.rs:49:38
+   |
+16 | pub fn get_mixdowns_directory() -> Result<PathBuf, ImportError> {
+   |                                    ---------------------------- expected `ImportError` because of this
+...
+49 |     fs::create_dir_all(&mixdowns_dir)?;
+   |     ---------------------------------^ the trait `From<std::io::Error>` is not implemented for `ImportError`
+   |     |
+   |     this can't be annotated with `?` because it has type `Result<_, std::io::Error>`
+   |
+note: `ImportError` needs to implement `From<std::io::Error>`
+  --> src\import\mod.rs:26:1
+   |
+26 | pub enum ImportError {
+   | ^^^^^^^^^^^^^^^^^^^^
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+
+error[E0277]: `?` couldn't convert the error to `ImportError`                                                                                                                                                                    
+   --> src\import\mixdown.rs:192:49
+    |
+162 | ) -> Result<(String, Vec<DecodedStem>), ImportError> {
+    |      ----------------------------------------------- expected `ImportError` because of this
+...
+192 |     fs::copy(&stem_file_paths[0], &mixdown_path)?;
+    |     --------------------------------------------^ the trait `From<std::io::Error>` is not implemented for `ImportError`
+    |     |
+    |     this can't be annotated with `?` because it has type `Result<_, std::io::Error>`
+    |
+note: `ImportError` needs to implement `From<std::io::Error>`
+   --> src\import\mod.rs:26:1
+    |
+26  | pub enum ImportError {
+    | ^^^^^^^^^^^^^^^^^^^^
+    = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+
+error[E0599]: no method named `par_iter` found for reference `&[PathBuf]` in the current scope                                                                                                                                   
+   --> src\import\mixdown.rs:202:6
+    |
+201 |     let decode_results: Vec<Result<(Vec<f32>, Vec<f32>, u32, PathBuf), ImportError>> = stem_file_paths
+    |  ______________________________________________________________________________________-
+202 | |     .par_iter()
+    | |_____-^^^^^^^^
+    |
+help: there is a method `iter` with a similar name
+    |
+202 -     .par_iter()
+202 +     .iter()
+    |
+
+error[E0599]: no method named `par_iter` found for reference `&[PathBuf]` in the current scope                                                                                                                                   
+   --> src\import\mod.rs:157:6
+    |
+156 | /   file_paths
+157 | |     .par_iter()
+    | |_____-^^^^^^^^
+    |
+help: there is a method `iter` with a similar name
+    |
+157 -     .par_iter()
+157 +     .iter()
+    |
+
+error[E0308]: mismatched types                                                                                                                                                                                                   
+   --> src\import\mod.rs:176:20
+    |
+176 |         file_path: file_path.clone(),
+    |                    ^^^^^^^^^^^^^^^^^- help: try using a conversion method: `.to_path_buf()`
+    |                    |
+    |                    expected `PathBuf`, found `&Path`
+
+error[E0599]: `ImportError` doesn't implement `std::fmt::Display`                                                                                                                                                                
+   --> src\import\mod.rs:243:23
+    |
+26  | pub enum ImportError {
+    | -------------------- method `to_string` not found for this enum because it doesn't satisfy `ImportError: ToString` or `ImportError: std::fmt::Display`
+...
+243 |         errors.push(e.to_string());
+    |                       ^^^^^^^^^ `ImportError` cannot be formatted with the default formatter
+    |
+    = note: the following trait bounds were not satisfied:
+            `ImportError: std::fmt::Display`
+            which is required by `ImportError: ToString`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+note: the trait `std::fmt::Display` must be implemented
+   --> /rustc/17067e9ac6d7ecb70e50f92c1944e545188d2359\library\core\src\fmt\mod.rs:1019:1
+    = help: items from traits can only be used if the trait is implemented and in scope
+    = note: the following trait defines an item `to_string`, perhaps you need to implement it:
+            candidate #1: `ToString`
+
+error[E0599]: the method `to_string` exists for reference `&ImportError`, but its trait bounds were not satisfied                                                                                                                
+   --> src\import\mod.rs:401:30
+    |
+26  | pub enum ImportError {
+    | -------------------- doesn't satisfy `ImportError: ToString` or `ImportError: std::fmt::Display`
+...
+401 |         progress.add_error(e.to_string());
+    |                              ^^^^^^^^^ method cannot be called on `&ImportError` due to unsatisfied trait bounds
+    |
+    = note: the following trait bounds were not satisfied:
+            `ImportError: std::fmt::Display`
+            which is required by `ImportError: ToString`
+            `&ImportError: std::fmt::Display`
+            which is required by `&ImportError: ToString`
+note: the trait `std::fmt::Display` must be implemented
+   --> /rustc/17067e9ac6d7ecb70e50f92c1944e545188d2359\library\core\src\fmt\mod.rs:1019:1
+    = help: items from traits can only be used if the trait is implemented and in scope
+    = note: the following trait defines an item `to_string`, perhaps you need to implement it:
+            candidate #1: `ToString`
+
+error[E0277]: `AudioError` doesn't implement `std::fmt::Display`                                                                                                                                                                 
+   --> src\commands\settings.rs:285:63
+    |
+285 |     .map_err(|e| format!("Failed to switch audio device: {}", e))?;
+    |                                                               ^ `AudioError` cannot be formatted with the default formatter
+    |
+    = help: the trait `std::fmt::Display` is not implemented for `AudioError`
+    = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+    = note: this error originates in the macro `$crate::__export::format_args` which comes from the expansion of the macro `format` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rusqlite`                                                                                                                                           
+  --> src\database\songs.rs:80:31
+   |
+80 |   let mut params: Vec<Box<dyn rusqlite::ToSql>> = Vec::new();
+   |                               ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+   |
+   = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rusqlite`
+   --> src\database\songs.rs:121:28
+    |
+121 |   let param_refs: Vec<&dyn rusqlite::ToSql> = params.iter().map(|p| p.as_ref()).collect();
+    |                            ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+    |
+    = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+error[E0433]: failed to resolve: use of unresolved module or unlinked crate `rusqlite`
+   --> src\database\mod.rs:185:20
+    |
+185 |   Rusqlite(#[from] rusqlite::Error),
+    |                    ^^^^^^^^ use of unresolved module or unlinked crate `rusqlite`
+    |
+    = help: if you wanted to use a crate named `rusqlite`, use `cargo add rusqlite` to add it to your `Cargo.toml`
+
+Some errors have detailed explanations: E0277, E0308, E0432, E0433, E0599.
+For more information about an error, try `rustc --explain E0277`.
+warning: `trax` (lib) generated 6 warnings                                                                                                                                                                                       
+error: could not compile `trax` (lib) due to 203 previous errors; 6 warnings emitted
+failed to build app: failed to build app
+       Error failed to build app: failed to build app
