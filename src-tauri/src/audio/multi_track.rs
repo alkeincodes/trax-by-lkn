@@ -1,10 +1,14 @@
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{Device, Stream, StreamConfig, SampleRate};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
-use std::thread;
 
-use super::buffer::AudioBuffer;
+#[cfg(not(target_os = "macos"))]
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+#[cfg(not(target_os = "macos"))]
+use cpal::{Device, Stream, StreamConfig, SampleRate};
+
+#[cfg(target_os = "macos")]
+use super::macos_backend::MacOSAudioStream;
+
 use super::decoder::AudioDecoder;
 use super::resampler::LinearResampler;
 use super::types::{AudioError, AudioResult, PlaybackState};
@@ -57,7 +61,12 @@ pub struct MultiTrackEngine {
   master_level: Arc<std::sync::atomic::AtomicU32>,
   playback_state: Arc<Mutex<PlaybackState>>,
   position: Arc<AtomicU64>,
+  #[cfg(target_os = "macos")]
+  stream: Option<MacOSAudioStream>,
+  #[cfg(not(target_os = "macos"))]
   stream: Option<Stream>,
+  current_device_name: Option<String>,
+  device_sample_rate: u32,
 }
 
 struct Stem {
@@ -107,13 +116,6 @@ impl MultiTrackEngine {
 
     log::info!("Initializing multi-track engine with {} stems...", max_stems);
 
-    let host = cpal::default_host();
-    let device = host
-      .default_output_device()
-      .ok_or_else(|| AudioError::DeviceInit("No output device available".to_string()))?;
-
-    log::info!("Using audio device: {:?}", device.name());
-
     let mut stems_vec = Vec::with_capacity(max_stems);
     let mut stem_volumes = Vec::with_capacity(max_stems);
     let mut stem_mutes = Vec::with_capacity(max_stems);
@@ -146,20 +148,58 @@ impl MultiTrackEngine {
       playback_state: playback_state.clone(),
       position: position.clone(),
       stream: None,
+      current_device_name: None,
+      device_sample_rate: TARGET_SAMPLE_RATE,
     };
 
-    engine.initialize_stream(&device)?;
+    // Initialize with default device
+    #[cfg(target_os = "macos")]
+    {
+      engine.initialize_stream_macos("default")?;
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+      let host = cpal::default_host();
+      let device = host
+        .default_output_device()
+        .ok_or_else(|| AudioError::DeviceInit("No output device available".to_string()))?;
+
+      log::info!("Using audio device: {:?}", device.name());
+      engine.current_device_name = device.name().ok();
+      engine.initialize_stream(&device)?;
+    }
 
     log::info!("Multi-track engine initialized successfully");
     Ok(engine)
   }
 
+  #[cfg(not(target_os = "macos"))]
   fn initialize_stream(&mut self, device: &Device) -> AudioResult<()> {
+    log::info!("Initializing stream for device: {:?}", device.name());
+
+    // Get supported configs to ensure we're using a valid configuration
+    let supported_configs = device
+      .supported_output_configs()
+      .map_err(|e| AudioError::DeviceInit(format!("Failed to get supported configs: {}", e)))?;
+
+    log::info!("Device supported output configs:");
+    for (i, config) in supported_configs.enumerate() {
+      log::info!("  Config #{}: channels={}, sample_rate={:?}",
+        i + 1,
+        config.channels(),
+        config.min_sample_rate()..=config.max_sample_rate()
+      );
+    }
+
     let config = StreamConfig {
       channels: 2,
       sample_rate: SampleRate(TARGET_SAMPLE_RATE),
       buffer_size: cpal::BufferSize::Fixed(BUFFER_SIZE as u32),
     };
+
+    log::info!("Building stream with config: channels={}, sample_rate={}, buffer_size={}",
+      config.channels, config.sample_rate.0, BUFFER_SIZE);
 
     let stems = self.stems.clone();
     let playback_state = self.playback_state.clone();
@@ -184,13 +224,129 @@ impl MultiTrackEngine {
       )
       .map_err(|e| AudioError::DeviceInit(format!("Failed to build stream: {}", e)))?;
 
+    log::info!("Stream built successfully, starting playback...");
+
     stream
       .play()
       .map_err(|e| AudioError::PlaybackError(format!("Failed to start stream: {}", e)))?;
 
+    log::info!("Stream is now playing");
+
     self.stream = Some(stream);
 
     Ok(())
+  }
+
+  #[cfg(target_os = "macos")]
+  fn initialize_stream_macos(&mut self, device_name: &str) -> AudioResult<()> {
+    log::info!("Initializing macOS audio stream for device: {}", device_name);
+
+    // If "default", get the actual default device name
+    let actual_device_name = if device_name == "default" {
+      Self::get_default_device_name_macos()?
+    } else {
+      device_name.to_string()
+    };
+
+    log::info!("Using device: {}", actual_device_name);
+
+    // Create macOS audio stream
+    let mut stream = MacOSAudioStream::new(
+      &actual_device_name,
+      self.playback_state.clone(),
+      self.position.clone()
+    )?;
+
+    // Set up render callback with our audio processing
+    let stems = self.stems.clone();
+    let playback_state = self.playback_state.clone();
+    let position = self.position.clone();
+    let stem_volumes: Vec<_> = self.stem_volumes.iter().cloned().collect();
+    let stem_mutes: Vec<_> = self.stem_mutes.iter().cloned().collect();
+    let stem_solos: Vec<_> = self.stem_solos.iter().cloned().collect();
+    let stem_levels: Vec<_> = self.stem_levels.iter().cloned().collect();
+    let master_volume = self.master_volume.clone();
+    let master_level = self.master_level.clone();
+
+    stream.set_render_callback(move |data: &mut [f32]| {
+      Self::audio_callback(data, &stems, &playback_state, &position, &stem_volumes, &stem_mutes, &stem_solos, &stem_levels, &master_volume, &master_level);
+    })?;
+
+    // Initialize and start the audio unit
+    stream.initialize()?;
+    stream.start()?;
+
+    // Get the actual device sample rate
+    let device_sample_rate = stream.sample_rate() as u32;
+    log::info!("Device sample rate: {}Hz", device_sample_rate);
+
+    self.current_device_name = Some(actual_device_name);
+    self.device_sample_rate = device_sample_rate;
+    self.stream = Some(stream);
+
+    log::info!("macOS audio stream initialized and started successfully");
+    Ok(())
+  }
+
+  #[cfg(target_os = "macos")]
+  fn get_default_device_name_macos() -> AudioResult<String> {
+    use coreaudio::sys::{
+      kAudioHardwarePropertyDefaultOutputDevice, kAudioObjectPropertyScopeGlobal,
+      kAudioObjectSystemObject, AudioObjectGetPropertyData, AudioObjectPropertyAddress,
+      kAudioObjectPropertyElementMain, kAudioObjectPropertyName, AudioDeviceID
+    };
+    use core_foundation::string::{CFString, CFStringRef};
+    use core_foundation::base::TCFType;
+    use std::ptr;
+
+    unsafe {
+      // Get default output device ID
+      let mut default_device_id: AudioDeviceID = 0;
+      let default_property = AudioObjectPropertyAddress {
+        mSelector: kAudioHardwarePropertyDefaultOutputDevice,
+        mScope: kAudioObjectPropertyScopeGlobal,
+        mElement: kAudioObjectPropertyElementMain as u32,
+      };
+
+      let mut size = std::mem::size_of::<AudioDeviceID>() as u32;
+      let status = AudioObjectGetPropertyData(
+        kAudioObjectSystemObject,
+        &default_property,
+        0,
+        ptr::null(),
+        &mut size,
+        &mut default_device_id as *mut _ as *mut _,
+      );
+
+      if status != 0 {
+        return Err(AudioError::DeviceInit("Failed to get default device".into()));
+      }
+
+      // Get device name
+      let name_property = AudioObjectPropertyAddress {
+        mSelector: kAudioObjectPropertyName,
+        mScope: kAudioObjectPropertyScopeGlobal,
+        mElement: kAudioObjectPropertyElementMain as u32,
+      };
+
+      let mut cf_name: CFStringRef = ptr::null();
+      let mut name_size = std::mem::size_of::<CFStringRef>() as u32;
+      let status = AudioObjectGetPropertyData(
+        default_device_id,
+        &name_property,
+        0,
+        ptr::null(),
+        &mut name_size,
+        &mut cf_name as *mut _ as *mut _,
+      );
+
+      if status == 0 && !cf_name.is_null() {
+        let cf_string = CFString::wrap_under_get_rule(cf_name);
+        Ok(cf_string.to_string())
+      } else {
+        Err(AudioError::DeviceInit("Failed to get default device name".into()))
+      }
+    }
   }
 
   fn audio_callback(
@@ -296,6 +452,14 @@ impl MultiTrackEngine {
     self.active_stems()
   }
 
+  pub fn device_sample_rate(&self) -> u32 {
+    self.device_sample_rate
+  }
+
+  pub fn current_device_name(&self) -> Option<String> {
+    self.current_device_name.clone()
+  }
+
   pub fn buffer_pool_capacity(&self) -> usize {
     self.max_stems
   }
@@ -310,11 +474,11 @@ impl MultiTrackEngine {
     let mut decoded_samples = decoder.decode_all()?;
 
     // Resample if necessary
-    if metadata.sample_rate != TARGET_SAMPLE_RATE {
-      log::info!("Resampling from {}Hz to {}Hz", metadata.sample_rate, TARGET_SAMPLE_RATE);
+    if metadata.sample_rate != self.device_sample_rate {
+      log::info!("Resampling from {}Hz to {}Hz", metadata.sample_rate, self.device_sample_rate);
       let mut resampler = LinearResampler::new(
         metadata.sample_rate,
-        TARGET_SAMPLE_RATE,
+        self.device_sample_rate,
         metadata.channels,
       );
       decoded_samples = resampler.process(&decoded_samples);
@@ -333,12 +497,12 @@ impl MultiTrackEngine {
       .position(|s| s.is_none())
       .ok_or_else(|| AudioError::PlaybackError("No available stem slots".to_string()))?;
 
-    let duration = samples.len() as f64 / (TARGET_SAMPLE_RATE as f64 * 2.0);
+    let duration = samples.len() as f64 / (self.device_sample_rate as f64 * 2.0);
 
     let stem = Stem {
       id: stem_id,
       samples, // No copying - just share the Arc!
-      sample_rate: TARGET_SAMPLE_RATE,
+      sample_rate: self.device_sample_rate,
       channels: 2, // Assuming stereo
       duration,
     };
@@ -442,13 +606,30 @@ impl MultiTrackEngine {
   pub fn pause(&mut self) -> AudioResult<()> {
     let mut state = self.playback_state.lock().unwrap();
     *state = PlaybackState::Paused;
+    drop(state);
+
+    // Reset all stem levels and master level to 0 immediately
+    for level in &self.stem_levels {
+      level.store(f32::to_bits(0.0), Ordering::Release);
+    }
+    self.master_level.store(f32::to_bits(0.0), Ordering::Release);
+
     Ok(())
   }
 
   pub fn stop(&mut self) -> AudioResult<()> {
     let mut state = self.playback_state.lock().unwrap();
     *state = PlaybackState::Stopped;
+    drop(state);
+
     self.position.store(0, Ordering::Release);
+
+    // Reset all stem levels and master level to 0 immediately
+    for level in &self.stem_levels {
+      level.store(f32::to_bits(0.0), Ordering::Release);
+    }
+    self.master_level.store(f32::to_bits(0.0), Ordering::Release);
+
     Ok(())
   }
 
@@ -505,11 +686,84 @@ impl MultiTrackEngine {
   pub fn master_level_arc(&self) -> Arc<std::sync::atomic::AtomicU32> {
     self.master_level.clone()
   }
+
+
+  /// Switch to a different audio output device by name
+  pub fn switch_audio_device(&mut self, device_name: &str) -> AudioResult<()> {
+    log::info!("Switching audio device to: {}", device_name);
+
+    // Save current playback state and position
+    let was_playing = {
+      let state = self.playback_state.lock().unwrap();
+      *state == PlaybackState::Playing
+    };
+    let current_position = self.position.load(Ordering::Acquire);
+
+    log::info!("Current state: playing={}, position={}", was_playing, current_position);
+
+    // Pause playback (don't use stop() as it resets position)
+    {
+      let mut state = self.playback_state.lock().unwrap();
+      *state = PlaybackState::Paused;
+    }
+
+    // Wait a moment for the audio callback to finish processing
+    std::thread::sleep(std::time::Duration::from_millis(50));
+
+    // Drop the current stream completely
+    if let Some(stream) = self.stream.take() {
+      log::info!("Dropping old stream");
+      drop(stream);
+    }
+
+    // Wait another moment to ensure stream is fully dropped
+    std::thread::sleep(std::time::Duration::from_millis(50));
+
+    // Initialize stream with the new device based on platform
+    #[cfg(target_os = "macos")]
+    {
+      self.initialize_stream_macos(device_name)?;
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+      // Find the new device
+      let host = cpal::default_host();
+      let device = host
+        .output_devices()
+        .map_err(|e| AudioError::DeviceInit(format!("Failed to enumerate devices: {}", e)))?
+        .find(|d| d.name().ok().as_deref() == Some(device_name))
+        .ok_or_else(|| AudioError::DeviceInit(format!("Device '{}' not found", device_name)))?;
+
+      log::info!("Found device for stream: {:?}", device.name());
+
+      self.current_device_name = Some(device_name.to_string());
+      self.initialize_stream(&device)?;
+    }
+
+    // Restore position
+    self.position.store(current_position, Ordering::Release);
+    log::info!("Restored position to: {}", current_position);
+
+    // Restore playback state if it was playing
+    if was_playing {
+      let mut state = self.playback_state.lock().unwrap();
+      *state = PlaybackState::Playing;
+      log::info!("Resumed playback");
+    }
+
+    log::info!("Successfully switched to device: {}", device_name);
+    Ok(())
+  }
 }
 
 impl Drop for MultiTrackEngine {
   fn drop(&mut self) {
-    if let Some(stream) = self.stream.take() {
+    if let Some(mut stream) = self.stream.take() {
+      #[cfg(target_os = "macos")]
+      {
+        let _ = stream.stop();
+      }
       drop(stream);
     }
   }

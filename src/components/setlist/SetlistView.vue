@@ -14,7 +14,6 @@ const modalStore = useModalStore()
 const playbackStore = usePlaybackStore()
 
 const draggedIndex = ref<number | null>(null)
-const dropZoneActive = ref(false)
 
 onMounted(() => {
   setlistStore.fetchSetlists()
@@ -38,31 +37,6 @@ function handleDrop(targetIndex: number) {
 
 function handleRemoveSong(songId: string) {
   setlistStore.removeSongFromSetlist(songId)
-}
-
-function handleDropZoneDragOver(e: DragEvent) {
-  e.preventDefault()
-  if (e.dataTransfer) {
-    e.dataTransfer.dropEffect = 'copy'
-  }
-  dropZoneActive.value = true
-}
-
-function handleDropZoneDragLeave() {
-  dropZoneActive.value = false
-}
-
-function handleDropZoneDrop(e: DragEvent) {
-  e.preventDefault()
-  dropZoneActive.value = false
-
-  const songId = e.dataTransfer?.getData('text/plain')
-  if (songId && setlistStore.currentSetlist) {
-    // Check if song is already in setlist
-    if (!setlistStore.currentSetlist.song_ids.includes(songId)) {
-      setlistStore.addSongToSetlist(songId)
-    }
-  }
 }
 
 async function handleSongSelect(song: Song) {

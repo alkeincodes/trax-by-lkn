@@ -24,6 +24,7 @@ export interface Stem {
   duration: number
   volume: number
   is_muted: boolean
+  display_order: number
   level?: number // Peak audio level (0.0 to 1.0+), updated in real-time
   is_solo?: boolean // Solo state (frontend only, not persisted)
 }
@@ -71,4 +72,10 @@ export interface Setlist {
   created_at: number
   updated_at: number
   song_ids: string[]
+}
+
+// Audio device model matching Rust backend
+export interface AudioDevice {
+  name: string
+  is_default: boolean
 }

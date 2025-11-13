@@ -12,6 +12,7 @@ describe('SongCard', () => {
     tempo: 120,
     key: 'C',
     time_signature: '4/4',
+    mixdown_path: null,
     created_at: Date.now(),
     updated_at: Date.now(),
   }

@@ -7,6 +7,7 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 use hound::{WavWriter, WavSpec};
+use rayon::prelude::*;
 
 use super::ImportError;
 
@@ -148,11 +149,17 @@ fn decode_audio_file(file_path: &Path) -> Result<(Vec<f32>, Vec<f32>, u32), Impo
   Ok((left_channel, right_channel, sample_rate))
 }
 
-/// Generate a mixdown from multiple stem files
+/// Decoded stem data for caching
+pub struct DecodedStem {
+  pub samples: Vec<f32>,
+  pub sample_rate: u32,
+}
+
+/// Generate a mixdown from multiple stem files and return decoded stems for caching
 pub fn generate_mixdown(
   song_id: &str,
   stem_file_paths: &[PathBuf],
-) -> Result<String, ImportError> {
+) -> Result<(String, Vec<DecodedStem>), ImportError> {
   if stem_file_paths.is_empty() {
     return Err(ImportError::Validation("No stem files provided for mixdown".to_string()));
   }
@@ -165,27 +172,55 @@ pub fn generate_mixdown(
     let mixdown_filename = get_mixdown_filename(song_id);
     let mixdown_path = mixdowns_dir.join(&mixdown_filename);
 
-    // Simply copy the single file
+    // Decode the single stem for caching
+    log::info!("Decoding single stem for cache...");
+    let (left, right, sample_rate) = decode_audio_file(&stem_file_paths[0])?;
+
+    // Interleave channels for cache
+    let mut interleaved = Vec::with_capacity(left.len() * 2);
+    for i in 0..left.len() {
+      interleaved.push(left[i]);
+      interleaved.push(right[i]);
+    }
+
+    let decoded_stems = vec![DecodedStem {
+      samples: interleaved,
+      sample_rate,
+    }];
+
+    // Simply copy the single file as mixdown
     fs::copy(&stem_file_paths[0], &mixdown_path)?;
 
     log::info!("Single stem - copied to mixdown: {}", mixdown_path.display());
-    return Ok(mixdown_path.to_string_lossy().to_string());
+    return Ok((mixdown_path.to_string_lossy().to_string(), decoded_stems));
   }
 
-  // Decode all stem files
+  // Decode all stem files in parallel
+  log::info!("Decoding {} stems in parallel...", stem_file_paths.len());
+
+  let decode_results: Vec<Result<(Vec<f32>, Vec<f32>, u32, PathBuf), ImportError>> = stem_file_paths
+    .par_iter()
+    .map(|file_path| {
+      log::info!("Decoding stem: {}", file_path.display());
+      let (left, right, sample_rate) = decode_audio_file(file_path)?;
+      Ok((left, right, sample_rate, file_path.clone()))
+    })
+    .collect();
+
+  // Process results and check for errors
   let mut decoded_stems = Vec::new();
   let mut target_sample_rate = 0u32;
   let mut max_length = 0usize;
 
-  for file_path in stem_file_paths {
-    log::info!("Decoding stem: {}", file_path.display());
-    let (left, right, sample_rate) = decode_audio_file(file_path)?;
+  for result in decode_results {
+    let (left, right, sample_rate, file_path) = result?;
 
     if target_sample_rate == 0 {
       target_sample_rate = sample_rate;
     } else if target_sample_rate != sample_rate {
       log::warn!(
-        "Sample rate mismatch: {} vs {}. Using {}",
+        "Sample rate mismatch in {}: {} vs {}. Using {}",
+        file_path.display(),
         sample_rate,
         target_sample_rate,
         target_sample_rate
@@ -195,6 +230,8 @@ pub fn generate_mixdown(
     max_length = max_length.max(left.len());
     decoded_stems.push((left, right));
   }
+
+  log::info!("All {} stems decoded successfully", decoded_stems.len());
 
   // Mix all stems together
   let mut mixed_left = vec![0.0f32; max_length];
@@ -256,5 +293,24 @@ pub fn generate_mixdown(
     .map_err(|e| ImportError::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?;
 
   log::info!("Mixdown generated successfully: {}", mixdown_path.display());
-  Ok(mixdown_path.to_string_lossy().to_string())
+
+  // Prepare decoded stems for caching (interleave channels)
+  log::info!("Preparing {} decoded stems for cache at {}Hz...", decoded_stems.len(), target_sample_rate);
+  let cached_stems: Vec<DecodedStem> = decoded_stems
+    .into_iter()
+    .map(|(left, right)| {
+      let mut interleaved = Vec::with_capacity(left.len() * 2);
+      for i in 0..left.len() {
+        interleaved.push(left[i]);
+        interleaved.push(right[i]);
+      }
+      DecodedStem {
+        samples: interleaved,
+        sample_rate: target_sample_rate,
+      }
+    })
+    .collect();
+
+  log::info!("All stems ready for cache");
+  Ok((mixdown_path.to_string_lossy().to_string(), cached_stems))
 }

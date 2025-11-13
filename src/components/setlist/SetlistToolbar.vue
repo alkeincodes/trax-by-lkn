@@ -19,14 +19,6 @@ const setlistStore = useSetlistStore()
 const modalStore = useModalStore()
 
 const showRecentSetlists = computed(() => setlistStore.recentSetlists.length > 0)
-const saveStatus = computed(() => {
-  if (setlistStore.loading) return 'Saving...'
-  return 'Saved'
-})
-
-function handleNewSetlist() {
-  modalStore.openModal('new-setlist')
-}
 
 function handleDeleteSetlist() {
   if (!setlistStore.currentSetlist) return

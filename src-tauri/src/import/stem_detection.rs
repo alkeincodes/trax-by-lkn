@@ -27,6 +27,8 @@ pub fn detect_stem_name(filename: &str) -> String {
     ("orchestra", "Orchestra"),
     ("click", "Click"),
     ("guide", "Guide"),
+    ("metronome", "Click"),
+    ("other", "Other")
   ];
 
   // Try to extract stem name from various patterns

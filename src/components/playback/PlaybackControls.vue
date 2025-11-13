@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { usePlaybackStore } from '@/stores/playback'
-import Button from '@/components/ui/Button.vue'
-import { SkipBack, Play, Pause, Square, SkipForward } from 'lucide-vue-next'
 
 const playbackStore = usePlaybackStore()
 

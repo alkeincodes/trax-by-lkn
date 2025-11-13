@@ -1,7 +1,8 @@
-use super::AppState;
+use super::{AppState, CachedSong, CachedStem};
 use crate::database::{Song, SongFilter, SortBy};
 use crate::import::{import_song, ImportRequest};
 use std::path::PathBuf;
+use std::sync::Arc;
 use tauri::State;
 
 /// Import audio files as a new song with stems
@@ -30,15 +31,51 @@ pub async fn import_files(
   };
 
   // Perform the import
-  let song_id = import_song(&*state.database, request)
+  let import_result = import_song(&*state.database, request)
     .map_err(|e| format!("Import failed: {}", e))?;
 
-  log::info!("Successfully imported song with ID: {}", song_id);
+  log::info!("Successfully imported song with ID: {}", import_result.song_id);
+
+  // Get the stems from database to match with decoded data
+  let db_stems = state.database
+    .get_stems_for_song(&import_result.song_id)
+    .map_err(|e| format!("Failed to get imported stems: {}", e))?;
+
+  // Populate in-memory cache with decoded stems
+  if !import_result.decoded_stems.is_empty() && !db_stems.is_empty() {
+    log::info!("Populating cache with {} decoded stems...", import_result.decoded_stems.len());
+
+    let cached_stems: Vec<CachedStem> = db_stems
+      .iter()
+      .zip(import_result.decoded_stems.iter())
+      .map(|(db_stem, decoded_stem)| {
+        CachedStem {
+          stem_id: db_stem.id.clone(),
+          samples: Arc::new(decoded_stem.samples.clone()),
+          sample_rate: decoded_stem.sample_rate,
+          volume: db_stem.volume as f32,
+          is_muted: db_stem.is_muted,
+        }
+      })
+      .collect();
+
+    let cached_song = CachedSong {
+      song_id: import_result.song_id.clone(),
+      stems: cached_stems,
+    };
+
+    // Insert into cache
+    let mut cache = state.song_cache.lock()
+      .map_err(|_| "Failed to lock cache".to_string())?;
+    cache.insert(import_result.song_id.clone(), cached_song);
+
+    log::info!("✅ Song cached in memory - ready for instant playback!");
+  }
 
   // TODO: Emit import:progress events using app_handle.emit()
   // This will be implemented in the event emitter task
 
-  Ok(song_id)
+  Ok(import_result.song_id)
 }
 
 /// Get all songs from the library

@@ -28,6 +28,7 @@ pub struct Stem {
   pub duration: f64,
   pub volume: f64,
   pub is_muted: bool,
+  pub display_order: i32,
 }
 
 // Setlist model matching TypeScript interface

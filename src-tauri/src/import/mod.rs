@@ -13,6 +13,10 @@ use crate::database::{Database, Song, Stem};
 pub use metadata::{extract_metadata, AudioMetadata};
 pub use stem_detection::detect_stem_name;
 pub use duplicate::calculate_file_hash;
+pub use mixdown::DecodedStem;
+
+// Re-export ImportResult from the main import function section
+// (defined later in this file)
 
 // ========================================
 // ERROR TYPES
@@ -213,8 +217,14 @@ fn deduplicate_stem_names(processed_files: &mut [ProcessedFile]) {
 // MAIN IMPORT FUNCTION
 // ========================================
 
+/// Result of importing a song - contains song_id and decoded stems for caching
+pub struct ImportResult {
+  pub song_id: String,
+  pub decoded_stems: Vec<DecodedStem>,
+}
+
 /// Import a multi-track song into the database
-pub fn import_song(db: &Database, request: ImportRequest) -> Result<String, ImportError> {
+pub fn import_song(db: &Database, request: ImportRequest) -> Result<ImportResult, ImportError> {
   // Validate request
   request.validate()?;
 
@@ -296,13 +306,13 @@ pub fn import_song(db: &Database, request: ImportRequest) -> Result<String, Impo
     .collect();
 
   // Create stem records
-  for processed_file in processed_files {
+  for (index, processed_file) in processed_files.iter().enumerate() {
     let stem_id = uuid::Uuid::new_v4().to_string();
 
     let stem = Stem {
       id: stem_id,
       song_id: song_id.clone(),
-      name: processed_file.stem_name,
+      name: processed_file.stem_name.clone(),
       file_path: processed_file.file_path.to_string_lossy().to_string(),
       file_size: processed_file.metadata.file_size,
       sample_rate: processed_file.metadata.sample_rate,
@@ -310,6 +320,7 @@ pub fn import_song(db: &Database, request: ImportRequest) -> Result<String, Impo
       duration: processed_file.metadata.duration,
       volume: 0.8, // Default volume
       is_muted: false,
+      display_order: index as i32,
     };
 
     db.create_stem(&stem)
@@ -323,15 +334,15 @@ pub fn import_song(db: &Database, request: ImportRequest) -> Result<String, Impo
 
   // Generate mixdown from all stems
   log::info!("Generating mixdown for song '{}'...", request.title);
-  let mixdown_path = match mixdown::generate_mixdown(&song_id, &stem_file_paths) {
-    Ok(path) => {
+  let (mixdown_path, decoded_stems) = match mixdown::generate_mixdown(&song_id, &stem_file_paths) {
+    Ok((path, stems)) => {
       log::info!("Mixdown generated successfully: {}", path);
-      Some(path)
+      (Some(path), stems)
     }
     Err(e) => {
       log::error!("Failed to generate mixdown: {}. Song will be imported without mixdown.", e);
       // Don't fail the entire import if mixdown generation fails
-      None
+      (None, Vec::new())
     }
   };
 
@@ -352,7 +363,10 @@ pub fn import_song(db: &Database, request: ImportRequest) -> Result<String, Impo
     stems_count
   );
 
-  Ok(song_id)
+  Ok(ImportResult {
+    song_id,
+    decoded_stems,
+  })
 }
 
 // ========================================
@@ -389,7 +403,8 @@ where
 
       progress_callback(&progress);
 
-      result
+      // Extract just the song_id from ImportResult
+      result.map(|import_result| import_result.song_id)
     })
     .collect();
 

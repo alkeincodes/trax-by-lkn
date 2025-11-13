@@ -36,6 +36,7 @@ describe('StemRow', () => {
       duration: 180,
       volume: 0.8,
       is_muted: false,
+    display_order: 0,
     }
   })
 
@@ -138,7 +139,7 @@ describe('StemRow', () => {
   })
 
   it('shows visual feedback when muted', async () => {
-    const mutedStem = { ...mockStem, is_muted: true }
+    const mutedStem = { ...mockStem, is_muted: true, display_order: 0 }
     const wrapper = mount(StemRow, {
       props: { stem: mutedStem },
     })

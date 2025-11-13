@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import LibraryView from '@/components/library/LibraryView.vue'
+import { onMounted, onUnmounted } from 'vue'
 import SetlistView from '@/components/setlist/SetlistView.vue'
 import ImportProgressModal from '@/components/modals/ImportProgressModal.vue'
 import ImportSongsModal from '@/components/modals/ImportSongsModal.vue'
@@ -12,9 +11,11 @@ import PlaybackControls from '@/components/playback/PlaybackControls.vue'
 import SeekBar from '@/components/playback/SeekBar.vue'
 import StemMixer from '@/components/playback/StemMixer.vue'
 import DronePad from '@/components/playback/DronePad.vue'
+import { listen } from '@tauri-apps/api/event'
 import { useKeyboardShortcuts } from '@/composables/useKeyboardShortcuts'
 import { usePlaybackStore } from '@/stores/playback'
 import { useLibraryStore } from '@/stores/library'
+import { useModalStore } from '@/stores/modal'
 
 // Initialize keyboard shortcuts
 useKeyboardShortcuts()
@@ -22,10 +23,24 @@ useKeyboardShortcuts()
 // Initialize stores
 const playbackStore = usePlaybackStore()
 const libraryStore = useLibraryStore()
+const modalStore = useModalStore()
 
-onMounted(() => {
+let unlistenSettings: (() => void) | null = null
+
+onMounted(async () => {
   playbackStore.initializeEventListeners()
   libraryStore.fetchSongs()
+
+  // Listen for native menu events
+  unlistenSettings = await listen('open-settings', () => {
+    modalStore.openModal('settings')
+  })
+})
+
+onUnmounted(() => {
+  if (unlistenSettings) {
+    unlistenSettings()
+  }
 })
 </script>
 

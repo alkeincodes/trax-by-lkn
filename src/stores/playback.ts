@@ -19,7 +19,6 @@ export const usePlaybackStore = defineStore('playback', () => {
   // Client-side position interpolation
   let animationFrameId: number | null = null
   let lastUpdateTime = 0
-  let backendPosition = 0
 
   // Getters
   const formattedPosition = computed(() => {
@@ -251,7 +250,6 @@ export const usePlaybackStore = defineStore('playback', () => {
 
   function updatePosition(position: number) {
     // Backend position update - sync our local position
-    backendPosition = position
     currentPosition.value = position
     lastUpdateTime = performance.now()
   }

@@ -42,4 +42,7 @@ pub enum AudioError {
 
   #[error("Invalid audio format: {0}")]
   InvalidFormat(String),
+
+  #[error("Audio stream error: {0}")]
+  StreamError(String),
 }

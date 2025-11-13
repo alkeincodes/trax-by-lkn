@@ -4,8 +4,8 @@ use super::models::Stem;
 // Create a new stem
 pub fn create_stem(conn: &Connection, stem: &Stem) -> Result<()> {
   conn.execute(
-    "INSERT INTO stems (id, song_id, name, file_path, file_size, sample_rate, channels, duration, volume, is_muted)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+    "INSERT INTO stems (id, song_id, name, file_path, file_size, sample_rate, channels, duration, volume, is_muted, display_order)
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
     params![
       stem.id,
       stem.song_id,
@@ -17,6 +17,7 @@ pub fn create_stem(conn: &Connection, stem: &Stem) -> Result<()> {
       stem.duration,
       stem.volume,
       stem.is_muted as i32,
+      stem.display_order,
     ],
   )?;
   Ok(())
@@ -25,7 +26,7 @@ pub fn create_stem(conn: &Connection, stem: &Stem) -> Result<()> {
 // Get a stem by ID
 pub fn get_stem(conn: &Connection, id: &str) -> Result<Stem> {
   conn.query_row(
-    "SELECT id, song_id, name, file_path, file_size, sample_rate, channels, duration, volume, is_muted
+    "SELECT id, song_id, name, file_path, file_size, sample_rate, channels, duration, volume, is_muted, display_order
      FROM stems WHERE id = ?1",
     [id],
     |row| {
@@ -40,6 +41,7 @@ pub fn get_stem(conn: &Connection, id: &str) -> Result<Stem> {
         duration: row.get(7)?,
         volume: row.get(8)?,
         is_muted: row.get::<_, i32>(9)? != 0,
+        display_order: row.get(10)?,
       })
     },
   )
@@ -48,8 +50,8 @@ pub fn get_stem(conn: &Connection, id: &str) -> Result<Stem> {
 // Get all stems for a song
 pub fn get_stems_for_song(conn: &Connection, song_id: &str) -> Result<Vec<Stem>> {
   let mut stmt = conn.prepare(
-    "SELECT id, song_id, name, file_path, file_size, sample_rate, channels, duration, volume, is_muted
-     FROM stems WHERE song_id = ?1 ORDER BY name COLLATE NOCASE ASC"
+    "SELECT id, song_id, name, file_path, file_size, sample_rate, channels, duration, volume, is_muted, display_order
+     FROM stems WHERE song_id = ?1 ORDER BY display_order ASC"
   )?;
 
   let stems = stmt.query_map([song_id], |row| {
@@ -64,6 +66,7 @@ pub fn get_stems_for_song(conn: &Connection, song_id: &str) -> Result<Vec<Stem>>
       duration: row.get(7)?,
       volume: row.get(8)?,
       is_muted: row.get::<_, i32>(9)? != 0,
+      display_order: row.get(10)?,
     })
   })?;
 
@@ -74,8 +77,8 @@ pub fn get_stems_for_song(conn: &Connection, song_id: &str) -> Result<Vec<Stem>>
 pub fn update_stem(conn: &Connection, stem: &Stem) -> Result<()> {
   conn.execute(
     "UPDATE stems SET name = ?1, file_path = ?2, file_size = ?3, sample_rate = ?4,
-     channels = ?5, duration = ?6, volume = ?7, is_muted = ?8
-     WHERE id = ?9",
+     channels = ?5, duration = ?6, volume = ?7, is_muted = ?8, display_order = ?9
+     WHERE id = ?10",
     params![
       stem.name,
       stem.file_path,
@@ -85,6 +88,7 @@ pub fn update_stem(conn: &Connection, stem: &Stem) -> Result<()> {
       stem.duration,
       stem.volume,
       stem.is_muted as i32,
+      stem.display_order,
       stem.id,
     ],
   )?;

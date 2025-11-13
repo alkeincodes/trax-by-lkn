@@ -8,6 +8,7 @@ use std::sync::Arc;
 use audio::MultiTrackEngine;
 use database::Database;
 use commands::AppState;
+use tauri::{Manager, Emitter, menu::{MenuBuilder, SubmenuBuilder, MenuItemBuilder}};
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
@@ -56,6 +57,30 @@ pub fn run() {
         .manage(app_state)
         .setup(move |app| {
             let app_handle = app.handle().clone();
+
+            // Build native menu
+            let settings_item = MenuItemBuilder::with_id("settings", "Settings...")
+                .accelerator("CmdOrCtrl+,")
+                .build(app)?;
+
+            let file_menu = SubmenuBuilder::new(app, "File")
+                .item(&settings_item)
+                .build()?;
+
+            let menu = MenuBuilder::new(app)
+                .item(&file_menu)
+                .build()?;
+
+            app.set_menu(menu)?;
+
+            // Handle menu events
+            app.on_menu_event(move |app, event| {
+                if event.id() == "settings" {
+                    // Emit event to frontend to open settings modal
+                    let _ = app.emit("open-settings", ());
+                }
+            });
+
             // Start the position emitter background task
             events::start_position_emitter(app_handle, position_arc, playback_state_arc, stem_levels_arc, master_level_arc);
             Ok(())
@@ -71,6 +96,7 @@ pub fn run() {
             commands::seek_to_position,
             commands::get_playback_position,
             commands::preload_setlist,
+            commands::preload_setlist_smart,
             // Stem control commands
             commands::set_stem_volume,
             commands::toggle_stem_mute,
@@ -94,6 +120,18 @@ pub fn run() {
             commands::add_song_to_setlist,
             commands::remove_song_from_setlist,
             commands::reorder_setlist_songs,
+            // Cache commands
+            commands::get_cache_stats,
+            commands::set_cache_size,
+            commands::clear_cache,
+            // Settings commands
+            commands::get_audio_devices,
+            commands::get_current_audio_device,
+            commands::get_audio_settings,
+            commands::set_audio_device,
+            commands::set_buffer_size,
+            commands::set_sample_rate,
+            commands::switch_audio_device,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

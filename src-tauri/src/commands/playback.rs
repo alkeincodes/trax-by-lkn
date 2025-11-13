@@ -10,7 +10,7 @@ pub async fn load_song(song_id: String, state: State<'_, AppState>, app_handle: 
   // Check if already in memory cache
   {
     let cache = state.song_cache.lock().map_err(|_| "Failed to lock cache")?;
-    if cache.contains_key(&song_id) {
+    if cache.contains(&song_id) {
       log::info!("Song {} already in memory, skipping load", song_id);
       return Ok(());
     }
@@ -32,6 +32,13 @@ pub async fn load_song(song_id: String, state: State<'_, AppState>, app_handle: 
 
   let total_stems = stems.len();
   log::info!("Loading {} stems in PARALLEL...", total_stems);
+
+  // Get device sample rate once before spawning tasks
+  let device_sample_rate = {
+    let engine = state.audio_engine.lock().map_err(|_| "Failed to lock engine")?;
+    engine.device_sample_rate()
+  };
+  log::info!("Using device sample rate: {}Hz for all stems", device_sample_rate);
 
   // Spawn parallel decoding tasks for all stems
   let mut decode_tasks = Vec::new();
@@ -71,25 +78,26 @@ pub async fn load_song(song_id: String, state: State<'_, AppState>, app_handle: 
       let mut samples = decoder.decode_all()
         .map_err(|e| format!("Failed to decode '{}': {}", stem_name, e))?;
 
-      // Resample if necessary
-      let _final_sample_rate = if metadata.sample_rate != 48000 {
-        log::info!("Resampling {} from {}Hz to 48000Hz", stem_name, metadata.sample_rate);
+      // Resample if necessary (using device_sample_rate from outer scope)
+      let final_sample_rate = if metadata.sample_rate != device_sample_rate {
+        log::info!("Resampling {} from {}Hz to {}Hz", stem_name, metadata.sample_rate, device_sample_rate);
         let mut resampler = super::super::audio::resampler::LinearResampler::new(
           metadata.sample_rate,
-          48000,
+          device_sample_rate,
           metadata.channels,
         );
         samples = resampler.process(&samples);
-        48000
+        device_sample_rate
       } else {
         metadata.sample_rate
       };
 
-      log::info!("✅ PARALLEL: Completed decode for stem {}/{}: {}", current_stem, total_stems, stem_name);
+      log::info!("✅ PARALLEL: Completed decode for stem {}/{}: {} at {}Hz", current_stem, total_stems, stem_name, final_sample_rate);
 
       Ok::<_, String>(super::CachedStem {
         stem_id,
         samples: std::sync::Arc::new(samples), // Wrap in Arc for zero-copy
+        sample_rate: final_sample_rate, // Store the sample rate
         volume: stem_volume as f32,
         is_muted: stem_is_muted,
       })
@@ -120,7 +128,7 @@ pub async fn load_song(song_id: String, state: State<'_, AppState>, app_handle: 
 
   log::info!("✅ All {} stems decoded successfully in parallel!", cached_stems.len());
 
-  // Store in memory cache
+  // Store in memory cache (LRU will auto-evict if needed)
   let mut cache = state.song_cache.lock().map_err(|_| "Failed to lock cache")?;
   cache.insert(song_id.clone(), super::CachedSong {
     song_id: song_id.clone(),
@@ -143,12 +151,11 @@ pub async fn play_song(song_id: String, state: State<'_, AppState>, app_handle: 
   // Ensure song is cached (decode if needed)
   load_song(song_id.clone(), state.clone(), app_handle).await?;
 
-  // Get cached song data
+  // Get cached song data (this updates LRU access time)
   let cached_song = {
-    let cache = state.song_cache.lock().map_err(|_| "Failed to lock cache")?;
+    let mut cache = state.song_cache.lock().map_err(|_| "Failed to lock cache")?;
     cache.get(&song_id)
       .ok_or_else(|| "Song not in cache".to_string())?
-      .clone() // Clone the CachedSong so we can use it outside the lock
   };
 
   // Lock the audio engine
@@ -263,7 +270,103 @@ pub async fn get_playback_position(state: State<'_, AppState>) -> Result<f64, St
   Ok(engine.position())
 }
 
+/// Preload songs with priority based on current playback position
+/// Priority: current song (instant) > next 2 > previous 1 > rest (background)
+#[tauri::command]
+pub async fn preload_setlist_smart(
+  setlist_id: String,
+  current_song_index: Option<usize>,
+  state: State<'_, AppState>,
+  app_handle: tauri::AppHandle
+) -> Result<(), String> {
+  log::info!("Starting smart preload for setlist: {} (current index: {:?})", setlist_id, current_song_index);
+
+  // Get setlist and its songs
+  let setlist = state.database
+    .get_setlist(&setlist_id)
+    .map_err(|e| format!("Failed to get setlist: {}", e))?;
+
+  let songs = state.database
+    .get_setlist_songs(&setlist_id)
+    .map_err(|e| format!("Failed to get setlist songs: {}", e))?;
+
+  if songs.is_empty() {
+    return Ok(());
+  }
+
+  let total = songs.len();
+  log::info!("Found {} songs in setlist '{}'", total, setlist.name);
+
+  // Determine priority order based on current position
+  let current_idx = current_song_index.unwrap_or(0);
+  let mut priority_queue: Vec<(usize, &str, &str)> = Vec::new(); // (index, song_id, priority_label)
+
+  // Priority 1: Current song (if specified)
+  if current_idx < songs.len() {
+    priority_queue.push((current_idx, &songs[current_idx].id, "CURRENT"));
+  }
+
+  // Priority 2: Next 2 songs
+  for offset in 1..=2 {
+    let next_idx = current_idx + offset;
+    if next_idx < songs.len() {
+      priority_queue.push((next_idx, &songs[next_idx].id, "NEXT"));
+    }
+  }
+
+  // Priority 3: Previous 1 song
+  if current_idx > 0 {
+    let prev_idx = current_idx - 1;
+    priority_queue.push((prev_idx, &songs[prev_idx].id, "PREVIOUS"));
+  }
+
+  // Priority 4: Rest of songs (background)
+  for (index, song) in songs.iter().enumerate() {
+    // Skip if already in priority queue
+    if index == current_idx || (index > current_idx && index <= current_idx + 2) || (index == current_idx.saturating_sub(1)) {
+      continue;
+    }
+    priority_queue.push((index, &song.id, "BACKGROUND"));
+  }
+
+  // Load songs in priority order
+  for (loaded_count, (song_idx, song_id, priority)) in priority_queue.iter().enumerate() {
+    let song_name = &songs[*song_idx].name;
+
+    log::info!(
+      "[{}] Preloading song {}/{}: '{}' (position {})",
+      priority,
+      loaded_count + 1,
+      total,
+      song_name,
+      song_idx + 1
+    );
+
+    // Emit progress event
+    let _ = app_handle.emit("preload:progress", serde_json::json!({
+      "current": loaded_count + 1,
+      "total": total,
+      "song_name": song_name,
+      "priority": priority,
+      "position": song_idx + 1,
+    }));
+
+    // Load song into cache (LRU will auto-evict if needed)
+    if let Err(e) = load_song(song_id.to_string(), state.clone(), app_handle.clone()).await {
+      log::warn!("Failed to preload song '{}': {}", song_name, e);
+      // Continue with next song even if this one fails
+    }
+  }
+
+  // Emit completion event
+  let _ = app_handle.emit("preload:complete", serde_json::json!({}));
+
+  log::info!("Finished smart preload for setlist '{}'", setlist.name);
+  Ok(())
+}
+
 /// Preload all songs in a setlist for instant playback during performance
+/// (Legacy method - loads all songs sequentially without prioritization)
 #[tauri::command]
 pub async fn preload_setlist(setlist_id: String, state: State<'_, AppState>, app_handle: tauri::AppHandle) -> Result<(), String> {
   log::info!("Starting to preload setlist: {}", setlist_id);

@@ -29,6 +29,10 @@ cpal = "0.15"
 symphonia = { version = "0.5", features = ["all"] }
 crossbeam-channel = "0.5"
 
+[target.'cfg(target_os = "macos")'.dependencies]
+coreaudio-rs = "0.11"  # Higher-level CoreAudio wrapper
+core-foundation = "0.9"
+
 # Database
 rusqlite = { version = "0.31", features = ["bundled", "uuid"] }
 uuid = { version = "1.6", features = ["v4", "serde"] }

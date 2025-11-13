@@ -104,6 +104,7 @@ describe('Playback Store', () => {
       duration: 180,
       volume: 0.8,
       is_muted: false,
+    display_order: 0,
     }
 
     const store = usePlaybackStore()
@@ -132,6 +133,7 @@ describe('Playback Store', () => {
       duration: 180,
       volume: 0.8,
       is_muted: false,
+    display_order: 0,
     }
 
     const store = usePlaybackStore()
@@ -217,6 +219,7 @@ describe('Playback Store', () => {
       tempo: 120,
       key: 'C',
       time_signature: '4/4',
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     }
@@ -255,6 +258,7 @@ describe('Playback Store', () => {
         duration: 180,
         volume: 0.8,
         is_muted: false,
+    display_order: 0,
       },
     ]
 

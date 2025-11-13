@@ -11,6 +11,7 @@ const mockSong: Song = {
   tempo: 80,
   key: 'G',
   time_signature: '4/4',
+    mixdown_path: null,
   created_at: Date.now(),
   updated_at: Date.now(),
 }
@@ -128,6 +129,7 @@ describe('SetlistItem', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     }

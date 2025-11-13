@@ -22,7 +22,7 @@ const filteredSongs = computed(() => {
   return libraryStore.songs.filter(
     song =>
       song.name.toLowerCase().includes(query) ||
-      song.artist.toLowerCase().includes(query)
+      song.artist?.toLowerCase().includes(query)
   )
 })
 

@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import { usePlaybackStore } from '@/stores/playback'
 import type { Stem } from '@/types/library'
-import Button from '@/components/ui/Button.vue'
 import VolumeMeter from './VolumeMeter.vue'
 
 interface Props {
@@ -42,7 +41,7 @@ const currentLevel = computed(() => props.stem.level || 0)
 
     <!-- Stem Name -->
     <div class="h-full text-center flex flex-col justify-center">
-      <div class="truncate text-sm font-medium mb-4 h-[25px]">
+      <div class="truncate text-sm font-medium mb-4 h-[25px] max-w-[85px]">
         {{ stem.name }}
       </div>
 

@@ -5,6 +5,9 @@ mod multi_track;
 
 pub mod decoder;
 pub mod resampler;
+pub mod cache;
+#[cfg(target_os = "macos")]
+pub mod macos_backend;
 
 pub use engine::AudioEngine;
 pub use multi_track::{MultiTrackEngine, StemCapacity};

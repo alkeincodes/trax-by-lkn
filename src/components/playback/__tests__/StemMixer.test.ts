@@ -54,6 +54,7 @@ describe('StemMixer', () => {
         duration: 180,
         volume: 0.8,
         is_muted: false,
+    display_order: 0,
       },
       {
         id: 'stem-2',
@@ -66,6 +67,7 @@ describe('StemMixer', () => {
         duration: 180,
         volume: 0.7,
         is_muted: false,
+    display_order: 0,
       },
     ]
 
@@ -97,6 +99,7 @@ describe('StemMixer', () => {
         duration: 180,
         volume: 0.8,
         is_muted: false,
+    display_order: 0,
       },
     ])
 

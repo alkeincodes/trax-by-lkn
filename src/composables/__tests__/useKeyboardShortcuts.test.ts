@@ -27,6 +27,7 @@ describe('useKeyboardShortcuts', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -57,6 +58,7 @@ describe('useKeyboardShortcuts', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -82,6 +84,7 @@ describe('useKeyboardShortcuts', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -108,6 +111,7 @@ describe('useKeyboardShortcuts', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -133,6 +137,7 @@ describe('useKeyboardShortcuts', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -163,6 +168,7 @@ describe('useKeyboardShortcuts', () => {
         duration: 180,
         volume: 0.8,
         is_muted: false,
+    display_order: 0,
       },
       {
         id: 'stem-2',
@@ -175,6 +181,7 @@ describe('useKeyboardShortcuts', () => {
         duration: 180,
         volume: 0.7,
         is_muted: false,
+    display_order: 0,
       },
     ])
 
@@ -204,6 +211,7 @@ describe('useKeyboardShortcuts', () => {
         duration: 180,
         volume: 0.8,
         is_muted: false,
+    display_order: 0,
       },
     ])
 
@@ -227,6 +235,7 @@ describe('useKeyboardShortcuts', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -257,6 +266,7 @@ describe('useKeyboardShortcuts', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })

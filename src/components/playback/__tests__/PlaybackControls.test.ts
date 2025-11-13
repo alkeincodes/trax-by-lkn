@@ -58,6 +58,7 @@ describe('PlaybackControls', () => {
       tempo: 120,
       key: 'C',
       time_signature: '4/4',
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -96,6 +97,7 @@ describe('PlaybackControls', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -132,6 +134,7 @@ describe('PlaybackControls', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -159,6 +162,7 @@ describe('PlaybackControls', () => {
       tempo: 120,
       key: 'C',
       time_signature: '4/4',
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })
@@ -183,6 +187,7 @@ describe('PlaybackControls', () => {
       tempo: null,
       key: null,
       time_signature: null,
+    mixdown_path: null,
       created_at: Date.now(),
       updated_at: Date.now(),
     })

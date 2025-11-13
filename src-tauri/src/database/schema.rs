@@ -1,7 +1,7 @@
 use rusqlite::{Connection, Result};
 
 // Current schema version
-pub const SCHEMA_VERSION: i32 = 2;
+pub const SCHEMA_VERSION: i32 = 3;
 
 // Initialize the database schema
 pub fn initialize_schema(conn: &Connection) -> Result<()> {
@@ -27,6 +27,10 @@ pub fn initialize_schema(conn: &Connection) -> Result<()> {
 
   if current_version < 2 {
     run_migration_v2(conn)?;
+  }
+
+  if current_version < 3 {
+    run_migration_v3(conn)?;
   }
 
   Ok(())
@@ -159,6 +163,30 @@ fn run_migration_v2(conn: &Connection) -> Result<()> {
 
   // Record migration
   record_migration(conn, 2)?;
+
+  Ok(())
+}
+
+// Migration V3: Add display_order to stems table
+fn run_migration_v3(conn: &Connection) -> Result<()> {
+  // Add display_order column to stems table
+  conn.execute(
+    "ALTER TABLE stems ADD COLUMN display_order INTEGER NOT NULL DEFAULT 0",
+    [],
+  )?;
+
+  // Backfill display_order for existing stems based on their current alphabetical order
+  conn.execute_batch("
+    WITH ordered_stems AS (
+      SELECT id, song_id, ROW_NUMBER() OVER (PARTITION BY song_id ORDER BY name COLLATE NOCASE ASC) - 1 as new_order
+      FROM stems
+    )
+    UPDATE stems
+    SET display_order = (SELECT new_order FROM ordered_stems WHERE ordered_stems.id = stems.id)
+  ")?;
+
+  // Record migration
+  record_migration(conn, 3)?;
 
   Ok(())
 }
