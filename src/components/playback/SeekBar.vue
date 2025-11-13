@@ -78,10 +78,14 @@ onMounted(() => {
           }
 
           if (audioPath) {
+            // Normalize path for Windows (replace backslashes with forward slashes)
+            const normalizedPath = audioPath.replace(/\\/g, '/')
+
             // Convert the file path to a URL that Tauri can serve
-            const audioUrl = convertFileSrc(audioPath)
+            const audioUrl = convertFileSrc(normalizedPath)
             console.log('Loading waveform from:', audioUrl)
             console.log('Original path:', audioPath)
+            console.log('Normalized path:', normalizedPath)
 
             // Fetch the audio file and create a blob URL
             try {
