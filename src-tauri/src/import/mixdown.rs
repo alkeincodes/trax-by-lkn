@@ -12,34 +12,43 @@ use rayon::prelude::*;
 use super::ImportError;
 
 /// Get the app data directory for storing mixdowns
-/// Works on both Windows and macOS
+/// Works on both Windows, macOS, and Linux
+/// Uses the same base directory as the database for consistency
 pub fn get_mixdowns_directory() -> Result<PathBuf, ImportError> {
   // Get the app data directory based on platform
+  // Must match the database location from database/connection.rs
   let app_data = if cfg!(target_os = "windows") {
-    // Windows: C:\Users\<user>\AppData\Local\TraX\mixdowns
-    std::env::var("LOCALAPPDATA")
+    // Windows: %APPDATA%\lkn\trax\mixdowns (same as database)
+    std::env::var("APPDATA")
       .map(PathBuf::from)
       .map_err(|_| ImportError::Io(std::io::Error::new(
         std::io::ErrorKind::NotFound,
-        "Could not find LOCALAPPDATA directory"
+        "Could not find APPDATA directory"
       )))?
-      .join("TraX")
+      .join("lkn")
+      .join("trax")
   } else if cfg!(target_os = "macos") {
-    // macOS: ~/Library/Application Support/TraX/mixdowns
-    dirs::data_local_dir()
-      .ok_or_else(|| ImportError::Io(std::io::Error::new(
+    // macOS: ~/Library/Application Support/com.lkn.trax (same as database)
+    let home = std::env::var("HOME")
+      .map_err(|_| ImportError::Io(std::io::Error::new(
         std::io::ErrorKind::NotFound,
-        "Could not find Application Support directory"
-      )))?
-      .join("TraX")
+        "Could not find HOME directory"
+      )))?;
+    PathBuf::from(home)
+      .join("Library")
+      .join("Application Support")
+      .join("com.lkn.trax")
   } else {
-    // Linux fallback: ~/.local/share/TraX/mixdowns
-    dirs::data_local_dir()
-      .ok_or_else(|| ImportError::Io(std::io::Error::new(
+    // Linux: ~/.local/share/trax (same as database)
+    let home = std::env::var("HOME")
+      .map_err(|_| ImportError::Io(std::io::Error::new(
         std::io::ErrorKind::NotFound,
-        "Could not find data directory"
-      )))?
-      .join("TraX")
+        "Could not find HOME directory"
+      )))?;
+    PathBuf::from(home)
+      .join(".local")
+      .join("share")
+      .join("trax")
   };
 
   let mixdowns_dir = app_data.join("mixdowns");
