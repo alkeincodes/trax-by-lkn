@@ -36,8 +36,6 @@
           "windows": ["*"],
           "permissions": [
             "core:default",
-            "core:asset:default",
-            "core:asset:allow-asset-protocol-asset",
             "dialog:allow-open",
             "dialog:allow-save",
             "dialog:allow-message",
